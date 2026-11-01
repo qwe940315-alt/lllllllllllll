@@ -14,12 +14,13 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; }
     .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .calendar-cell { min-height: 85px; }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen pb-12">
 
   <!-- 頂部導航 -->
-  <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur">
+  <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center text-white shadow-lg">
@@ -29,28 +30,39 @@
           <div class="flex items-center gap-2">
             <h1 class="text-lg font-bold text-white tracking-wide">小廖薪資專屬管家</h1>
             <span id="syncStatus" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 全員即時同步中
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 即時同步中
             </span>
           </div>
           <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE 雙職智慧排班</p>
         </div>
       </div>
 
+      <!-- 月份選擇器 -->
       <div class="flex items-center gap-2">
         <input type="month" id="monthPicker" class="bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-3 py-1.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
       </div>
+    </div>
+
+    <!-- 頁面切換分頁標籤 -->
+    <div class="max-w-6xl mx-auto px-4 flex border-t border-slate-800/80">
+      <button id="tabSettingsBtn" class="flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-emerald-500 text-emerald-400 transition">
+        <i class="fa-solid fa-pen-to-square"></i> 班表設定與明細
+      </button>
+      <button id="tabCalendarBtn" class="flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-calendar-days"></i> 整月上班日期表
+      </button>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 mt-6 space-y-6">
 
-    <!-- 頂部核心總覽 -->
+    <!-- 頂部核心總覽：首要展示【未扣勞健保前總薪資】 -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="glass-card md:col-span-2 p-5 rounded-2xl relative overflow-hidden">
-        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">當月預估實領總薪資</div>
+        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">當月預估應發總薪資 (未扣勞健保)</div>
         <div class="flex items-baseline gap-2">
-          <span class="text-3xl sm:text-4xl font-extrabold text-emerald-400" id="grandNetPay">$0</span>
-          <span class="text-xs text-slate-400">(應發 <span id="grandGrossPay">$0</span>)</span>
+          <span class="text-3xl sm:text-4xl font-extrabold text-emerald-400" id="grandGrossPay">$0</span>
+          <span class="text-xs text-slate-400">預估實領: <span id="grandNetPay" class="text-slate-300 font-medium">$0</span></span>
         </div>
         <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800 text-center text-xs">
           <div><div class="text-slate-400">總排班天數</div><div class="font-bold text-slate-200 mt-0.5" id="totalDays">0 天</div></div>
@@ -100,14 +112,14 @@
       </div>
     </div>
 
-    <!-- 排班操作面板 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- 頁面 1：班表設定與清單明細 -->
+    <div id="pageSettings" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- 排班輸入卡片 -->
       <div class="glass-card p-5 rounded-2xl space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="font-bold text-white flex items-center gap-2">
-            <i class="fa-regular fa-calendar-plus text-emerald-400"></i> 排班紀錄
+            <i class="fa-regular fa-calendar-plus text-emerald-400"></i> 排班設定
           </h2>
           <button id="openBatchModalBtn" class="text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
             <i class="fa-solid fa-calendar-days mr-1"></i> 多選日曆排班
@@ -120,18 +132,37 @@
             <input type="date" id="shiftDate" required class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
           </div>
 
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-xs text-slate-400">工作單位</label>
-              <select id="jobSelect" class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
-                <option value="A">八曜和茶</option>
-                <option value="B">INN CAFE</option>
-              </select>
+          <div>
+            <label class="text-xs text-slate-400">工作單位</label>
+            <select id="jobSelect" class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
+              <option value="A">八曜和茶</option>
+              <option value="B">INN CAFE</option>
+            </select>
+          </div>
+
+          <!-- 上班時間區間設定 -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
+            <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+              <i class="fa-regular fa-clock text-amber-400"></i> 上班時間段 (自動推算工時)
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <span class="text-[11px] text-slate-400">開始時間</span>
+                <input type="time" id="startTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+              </div>
+              <div>
+                <span class="text-[11px] text-slate-400">結束時間</span>
+                <input type="time" id="endTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+              </div>
             </div>
-            <div>
-              <label class="text-xs text-slate-400">當日工時 (小時)</label>
-              <input type="number" id="shiftHours" step="0.5" min="0.5" max="24" value="4.5" required class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center">
+              <label class="text-xs text-slate-400">計算工時 (小時)</label>
+              <span id="autoCalcTip" class="text-[10px] text-emerald-400 hidden">已自動計算</span>
             </div>
+            <input type="number" id="shiftHours" step="0.5" min="0.5" max="24" value="4.5" required class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100">
           </div>
 
           <div class="flex gap-2 pt-1">
@@ -139,7 +170,7 @@
               INN 9.5h 快捷
             </button>
             <button type="submit" class="w-1/2 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-md">
-              新增單筆
+              儲存排班
             </button>
           </div>
         </form>
@@ -168,11 +199,11 @@
       </div>
 
       <!-- 班表清單明細 -->
-      <div class="glass-card lg:col-span-2 p-5 rounded-2xl flex flex-col h-[520px]">
+      <div class="glass-card lg:col-span-2 p-5 rounded-2xl flex flex-col h-[560px]">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
           <div class="flex items-center gap-2">
             <h2 class="font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-emerald-400"></i> 班表記錄明細
+              <i class="fa-solid fa-list-check text-emerald-400"></i> 班表記錄清單
             </h2>
             <span id="recordCountBadge" class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">0 筆</span>
           </div>
@@ -184,6 +215,36 @@
         <div class="overflow-y-auto flex-1 mt-3 pr-1 space-y-2" id="shiftsList"></div>
       </div>
 
+    </div>
+
+    <!-- 頁面 2：整月上班日期表 (月曆視覺表格) -->
+    <div id="pageCalendar" class="glass-card p-5 rounded-2xl hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+        <div>
+          <h2 class="font-bold text-white text-base flex items-center gap-2">
+            <i class="fa-solid fa-calendar-day text-emerald-400"></i> 整月上班日期月曆表
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">以整月月曆檢視每日上班時間、單位與當日預估薪資</p>
+        </div>
+        <div class="flex items-center gap-4 text-xs">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/60 inline-block"></span> 八曜和茶</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60 inline-block"></span> INN CAFE</span>
+        </div>
+      </div>
+
+      <!-- 星期欄頭 -->
+      <div class="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-slate-400">
+        <div class="py-1 bg-slate-900/50 rounded-lg text-rose-400">週日</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg">週一</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg">週二</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg">週三</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg">週四</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg">週五</div>
+        <div class="py-1 bg-slate-900/50 rounded-lg text-rose-400">週六</div>
+      </div>
+
+      <!-- 月曆大網格 -->
+      <div id="monthlyScheduleGrid" class="grid grid-cols-7 gap-2"></div>
     </div>
 
   </main>
@@ -206,7 +267,7 @@
         <span class="text-slate-500 py-1">日</span><span class="text-slate-500 py-1">一</span><span class="text-slate-500 py-1">二</span>
         <span class="text-slate-500 py-1">三</span><span class="text-slate-500 py-1">四</span><span class="text-slate-500 py-1">五</span><span class="text-slate-500 py-1">六</span>
       </div>
-      <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+      <div id="batchCalendarGrid" class="grid grid-cols-7 gap-1.5"></div>
 
       <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
         <div>
@@ -230,18 +291,18 @@
 
   <script>
     // ========================================================
-    // 請將下方這段換成你在 Firebase 取得的金鑰：
+    // Firebase 金鑰配置（已校正單一括號格式）
     // ========================================================
-  const firebaseConfig = {
-  apiKey: "AIzaSyAh42UM29omNPbXWk9D3Q2M4nkumaxlJqo",
-  authDomain: "liao-97f96.firebaseapp.com",
-  projectId: "liao-97f96",
-  storageBucket: "liao-97f96.firebasestorage.app",
-  messagingSenderId: "512508376529",
-  appId: "1:512508376529:web:b7bb398b80016aca1b5cf0"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyDyy9UpsT8EkoloQTiP9BQRPQoLyMXiCjM",
+      authDomain: "liao-53b79.firebaseapp.com",
+      projectId: "liao-53b79",
+      storageBucket: "liao-53b79.firebasestorage.app",
+      messagingSenderId: "66866284609",
+      appId: "1:66866284609:web:641e4d50100897e2fe1ec0"
+    };
 
-    // 初始化 Firebase 與 即時 Firestore 資料庫
+    // 初始化 Firebase 與 Firestore 即時資料庫
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const shiftsCol = db.collection("shifts");
@@ -258,23 +319,73 @@
     let selectedDates = new Set();
     let isLate = false;
 
+    // DOM 元素引用
     const monthPicker = document.getElementById('monthPicker');
     const shiftDate = document.getElementById('shiftDate');
     const shiftsList = document.getElementById('shiftsList');
     const aLateToggle = document.getElementById('aLateToggle');
     const batchModal = document.getElementById('batchModal');
-    const calendarGrid = document.getElementById('calendarGrid');
+    const batchCalendarGrid = document.getElementById('batchCalendarGrid');
+    const monthlyScheduleGrid = document.getElementById('monthlyScheduleGrid');
+
+    const tabSettingsBtn = document.getElementById('tabSettingsBtn');
+    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+    const pageSettings = document.getElementById('pageSettings');
+    const pageCalendar = document.getElementById('pageCalendar');
+
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+    const shiftHoursInput = document.getElementById('shiftHours');
+    const autoCalcTip = document.getElementById('autoCalcTip');
 
     monthPicker.value = currentMonth;
     shiftDate.value = new Date().toISOString().slice(0, 10);
 
-    // --- 關鍵核心：雲端即時監聽（任何裝置改動，所有開啟網頁的人自動刷新） ---
+    // --- 頁面分頁切換機制 ---
+    tabSettingsBtn.addEventListener('click', () => {
+      tabSettingsBtn.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-emerald-500 text-emerald-400 transition";
+      tabCalendarBtn.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition";
+      pageSettings.classList.remove('hidden');
+      pageCalendar.classList.add('hidden');
+    });
+
+    tabCalendarBtn.addEventListener('click', () => {
+      tabCalendarBtn.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-emerald-500 text-emerald-400 transition";
+      tabSettingsBtn.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition";
+      pageCalendar.classList.remove('hidden');
+      pageSettings.classList.add('hidden');
+      renderMonthlyCalendar();
+    });
+
+    // --- 上下班時間自動換算工時 ---
+    function calculateHoursByTime() {
+      const start = startTimeInput.value;
+      const end = endTimeInput.value;
+      if (!start || !end) return;
+
+      const [sH, sM] = start.split(':').map(Number);
+      const [eH, eM] = end.split(':').map(Number);
+      let diffMinutes = (eH * 60 + eM) - (sH * 60 + sM);
+      if (diffMinutes < 0) diffMinutes += 24 * 60; // 跨午夜處理
+
+      let calculated = Math.round((diffMinutes / 60) * 10) / 10;
+      if (calculated > 0) {
+        shiftHoursInput.value = calculated;
+        autoCalcTip.classList.remove('hidden');
+      }
+    }
+
+    startTimeInput.addEventListener('change', calculateHoursByTime);
+    endTimeInput.addEventListener('change', calculateHoursByTime);
+
+    // --- 雲端即時監聽 (onSnapshot) ---
     shiftsCol.onSnapshot((snapshot) => {
       shifts = [];
       snapshot.forEach((doc) => {
         shifts.push({ id: doc.id, ...doc.data() });
       });
       render();
+      renderMonthlyCalendar();
     });
 
     let unsubscribeSettings = null;
@@ -284,6 +395,7 @@
         isLate = doc.exists ? !!doc.data().isLate : false;
         aLateToggle.checked = isLate;
         render();
+        renderMonthlyCalendar();
       });
     }
     listenSettings();
@@ -291,12 +403,16 @@
     // 快捷鍵
     document.getElementById('quick95Btn').addEventListener('click', () => {
       document.getElementById('jobSelect').value = 'B';
-      document.getElementById('shiftHours').value = '9.5';
+      shiftHoursInput.value = '9.5';
+      startTimeInput.value = '';
+      endTimeInput.value = '';
+      autoCalcTip.classList.add('hidden');
     });
 
     monthPicker.addEventListener('change', (e) => {
       currentMonth = e.target.value;
       listenSettings();
+      renderMonthlyCalendar();
     });
 
     aLateToggle.addEventListener('change', (e) => {
@@ -310,9 +426,18 @@
       e.preventDefault();
       const date = shiftDate.value;
       const job = document.getElementById('jobSelect').value;
-      const hours = parseFloat(document.getElementById('shiftHours').value);
+      const hours = parseFloat(shiftHoursInput.value);
+      const timeSlot = (startTimeInput.value && endTimeInput.value) 
+        ? `${startTimeInput.value}-${endTimeInput.value}` 
+        : '';
 
-      shiftsCol.add({ date, job, hours, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      shiftsCol.add({
+        date,
+        job,
+        hours,
+        timeSlot,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
       const shiftM = date.slice(0, 7);
       if (shiftM !== currentMonth) {
@@ -320,6 +445,11 @@
         monthPicker.value = currentMonth;
         listenSettings();
       }
+
+      // 重置時間輸入
+      startTimeInput.value = '';
+      endTimeInput.value = '';
+      autoCalcTip.classList.add('hidden');
     });
 
     window.deleteShift = function(id) {
@@ -336,10 +466,10 @@
       }
     });
 
-    // 批量排班
+    // --- 批量多選日曆排班 ---
     document.getElementById('openBatchModalBtn').addEventListener('click', () => {
       selectedDates.clear();
-      renderCalendar();
+      renderBatchCalendar();
       batchModal.classList.remove('hidden');
     });
 
@@ -347,14 +477,14 @@
       batchModal.classList.add('hidden');
     });
 
-    function renderCalendar() {
-      calendarGrid.innerHTML = '';
+    function renderBatchCalendar() {
+      batchCalendarGrid.innerHTML = '';
       const [year, month] = currentMonth.split('-').map(Number);
       const firstDay = new Date(year, month - 1, 1).getDay();
       const totalDays = new Date(year, month, 0).getDate();
 
       for (let i = 0; i < firstDay; i++) {
-        calendarGrid.appendChild(document.createElement('div'));
+        batchCalendarGrid.appendChild(document.createElement('div'));
       }
 
       for (let day = 1; day <= totalDays; day++) {
@@ -367,9 +497,9 @@
           if (selectedDates.has(dStr)) selectedDates.delete(dStr);
           else selectedDates.add(dStr);
           document.getElementById('selectedDaysCount').textContent = selectedDates.size;
-          renderCalendar();
+          renderBatchCalendar();
         });
-        calendarGrid.appendChild(btn);
+        batchCalendarGrid.appendChild(btn);
       }
       document.getElementById('selectedDaysCount').textContent = selectedDates.size;
     }
@@ -383,7 +513,7 @@
           selectedDates.add(`${currentMonth}-${String(d).padStart(2, '0')}`);
         }
       }
-      renderCalendar();
+      renderBatchCalendar();
     });
 
     document.getElementById('selectWeekendsBtn').addEventListener('click', () => {
@@ -395,12 +525,12 @@
           selectedDates.add(`${currentMonth}-${String(d).padStart(2, '0')}`);
         }
       }
-      renderCalendar();
+      renderBatchCalendar();
     });
 
     document.getElementById('clearSelectionBtn').addEventListener('click', () => {
       selectedDates.clear();
-      renderCalendar();
+      renderBatchCalendar();
     });
 
     document.getElementById('applyBatchShiftsBtn').addEventListener('click', () => {
@@ -411,14 +541,90 @@
       const batch = db.batch();
       selectedDates.forEach(date => {
         const newDoc = shiftsCol.doc();
-        batch.set(newDoc, { date, job, hours, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(newDoc, {
+          date,
+          job,
+          hours,
+          timeSlot: '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
       });
       batch.commit().then(() => {
         batchModal.classList.add('hidden');
       });
     });
 
-    // 核心結算渲染
+    // --- 整月上班日期表 (月曆視覺表格渲染) ---
+    function renderMonthlyCalendar() {
+      monthlyScheduleGrid.innerHTML = '';
+      const [year, month] = currentMonth.split('-').map(Number);
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const totalDays = new Date(year, month, 0).getDate();
+
+      const filteredShifts = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
+      let hoursA = 0;
+      filteredShifts.forEach(s => { if (s.job === 'A') hoursA += (Number(s.hours) || 0); });
+      const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
+
+      // 當月 1 號之前的空白格
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = "calendar-cell bg-slate-900/30 rounded-xl border border-slate-800/40 p-2 opacity-30";
+        monthlyScheduleGrid.appendChild(emptyCell);
+      }
+
+      // 渲染 1 ~ 31 日
+      for (let day = 1; day <= totalDays; day++) {
+        const dStr = `${currentMonth}-${String(day).padStart(2, '0')}`;
+        const dayShifts = filteredShifts.filter(s => s.date === dStr);
+        const dayOfWeek = new Date(year, month - 1, day).getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+        const cell = document.createElement('div');
+        cell.className = `calendar-cell rounded-xl border p-2 flex flex-col justify-between transition ${
+          dayShifts.length > 0 
+            ? 'bg-slate-800/80 border-slate-700/80 shadow-md' 
+            : 'bg-slate-900/40 border-slate-800/60'
+        }`;
+
+        let shiftsHtml = '';
+        if (dayShifts.length > 0) {
+          shiftsHtml = dayShifts.map(s => {
+            const isA = s.job === 'A';
+            const h = Number(s.hours) || 0;
+            let pay = isA ? h * rateA : (Math.min(8, h) * 200 + Math.max(0, h - 8) * 200 * 1.34);
+            return `
+              <div class="mt-1 p-1 rounded-md text-[10px] leading-tight ${
+                isA 
+                  ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-200' 
+                  : 'bg-amber-500/20 border border-amber-500/30 text-amber-200'
+              }">
+                <div class="font-semibold flex justify-between items-center">
+                  <span>${isA ? '八曜' : 'INN'}</span>
+                  <span>+$${Math.round(pay)}</span>
+                </div>
+                <div class="text-[9px] opacity-80 mt-0.5">
+                  ${s.timeSlot ? `${s.timeSlot} · ` : ''}${h}h
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        cell.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold ${isWeekend ? 'text-rose-400' : 'text-slate-300'}">${day}</span>
+              ${dayShifts.length > 0 ? `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>` : ''}
+            </div>
+            <div class="space-y-1 mt-0.5">${shiftsHtml}</div>
+          </div>
+        `;
+        monthlyScheduleGrid.appendChild(cell);
+      }
+    }
+
+    // --- 核心薪資結算與渲染 ---
     function render() {
       const filteredShifts = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
       filteredShifts.sort((a, b) => b.date.localeCompare(a.date));
@@ -442,7 +648,7 @@
       const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
       const payA = hoursA * rateA;
       const payB = (regHoursB * 200) + (otHoursB * 200 * 1.34);
-      const grossTotal = payA + payB;
+      const grossTotal = payA + payB; // 未扣勞健保前總薪資 (應發)
 
       const target = document.getElementById('insurTarget').value;
       let basePay = grossTotal;
@@ -459,14 +665,16 @@
       const labor = Math.round(bracket * 0.12 * 0.20);
       const health = Math.round(bracket * 0.0517 * 0.30);
       const deduction = labor + health;
-      const netTotal = Math.max(0, grossTotal - deduction);
+      const netTotal = Math.max(0, grossTotal - deduction); // 實領
 
-      document.getElementById('grandNetPay').textContent = `$${Math.round(netTotal).toLocaleString()}`;
+      // 頂部大數字醒目更新為「應發總薪資」
       document.getElementById('grandGrossPay').textContent = `$${Math.round(grossTotal).toLocaleString()}`;
+      document.getElementById('grandNetPay').textContent = `$${Math.round(netTotal).toLocaleString()}`;
       document.getElementById('totalDays').textContent = `${filteredShifts.length} 天`;
       document.getElementById('totalHours').textContent = `${(hoursA + hoursB).toFixed(1)} h`;
       document.getElementById('totalDeduction').textContent = `-$${deduction.toLocaleString()}`;
 
+      // 八曜狀態
       document.getElementById('payA').textContent = `$${Math.round(payA).toLocaleString()}`;
       document.getElementById('hoursA').textContent = hoursA.toFixed(1);
       document.getElementById('rateBadgeA').textContent = `時薪 $${rateA}`;
@@ -485,14 +693,17 @@
         document.getElementById('bonusTipA').className = 'text-[11px] text-slate-400 mt-1';
       }
 
+      // INN 狀態
       document.getElementById('payB').textContent = `$${Math.round(payB).toLocaleString()}`;
       document.getElementById('hoursB').textContent = hoursB.toFixed(1);
       document.getElementById('otHoursB').textContent = otHoursB.toFixed(1);
 
+      // 勞健保明細
       document.getElementById('bracketAmount').textContent = `$${bracket.toLocaleString()}`;
       document.getElementById('laborFee').textContent = `-$${labor.toLocaleString()}`;
       document.getElementById('healthFee').textContent = `-$${health.toLocaleString()}`;
 
+      // 班表記錄清單列表
       document.getElementById('recordCountBadge').textContent = `${filteredShifts.length} 筆`;
       if (filteredShifts.length === 0) {
         shiftsList.innerHTML = `
@@ -507,14 +718,7 @@
       shiftsList.innerHTML = filteredShifts.map(s => {
         const isA = s.job === 'A';
         const h = Number(s.hours) || 0;
-        let singlePay = 0;
-        if (isA) {
-          singlePay = h * rateA;
-        } else {
-          const reg = Math.min(8, h);
-          const ot = Math.max(0, h - 8);
-          singlePay = (reg * 200) + (ot * 200 * 1.34);
-        }
+        let singlePay = isA ? h * rateA : (Math.min(8, h) * 200 + Math.max(0, h - 8) * 200 * 1.34);
 
         return `
           <div class="p-3 bg-slate-800/60 hover:bg-slate-800 rounded-xl flex items-center justify-between border border-slate-700/50 transition">
@@ -526,6 +730,7 @@
                   <span class="text-[11px] px-1.5 py-0.2 rounded ${isA ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
                     ${isA ? '八曜和茶' : 'INN CAFE'}
                   </span>
+                  ${s.timeSlot ? `<span class="text-[10px] bg-slate-700/60 text-slate-300 px-1.5 py-0.2 rounded">${s.timeSlot}</span>` : ''}
                 </div>
                 <div class="text-[11px] text-slate-400 mt-0.5">
                   工時: ${h}h ${!isA && h > 8 ? `(加班 ${(h - 8).toFixed(1)}h)` : ''}
