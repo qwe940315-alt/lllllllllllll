@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小廖薪資與財務管理管家</title>
+  <title>小廖薪資與財務管理管家 - AI 智慧助理版</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -17,7 +17,6 @@
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; }
     .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    /* 壓縮版月曆儲存格樣式 */
     .compressed-cell { min-height: 68px; padding: 3px; }
   </style>
 </head>
@@ -37,7 +36,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 雲端同步中
             </span>
           </div>
-          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ 財務管理</p>
+          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ AI 智慧管家</p>
         </div>
       </div>
 
@@ -64,7 +63,38 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 mt-6 space-y-6">
+  <main class="max-w-6xl mx-auto px-4 mt-5 space-y-5">
+
+    <!-- ========================================== -->
+    <!-- AI 智慧對話助理輸入框 (全站置頂可隨時喚醒) -->
+    <!-- ========================================== -->
+    <div class="glass-card p-4 rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-slate-900/90 via-indigo-950/20 to-slate-900/90 shadow-lg">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2 text-xs font-bold text-indigo-400">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> AI 智慧排班與記帳對話框
+        </div>
+        <span class="text-[10px] text-slate-400">打字說出排班或花費，自動帶入</span>
+      </div>
+
+      <form id="aiAssistantForm" class="flex gap-2">
+        <div class="relative flex-1">
+          <input type="text" id="aiInput" placeholder="例如：11/2 3 7 9上咖啡大安店 11:00-21:00 或 今天去超商買晚餐花127 用信用卡" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+          <i class="fa-solid fa-paper-plane"></i> 發送
+        </button>
+      </form>
+
+      <!-- AI 快捷範例點擊帶入 -->
+      <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 items-center">
+        <span>快捷試試：</span>
+        <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="11/2 3 7 9上咖啡大安店 時間是11:00-21:00">批次排大安店班</button>
+        <span>·</span>
+        <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="今天去超商買晚餐花127 用信用卡">記超商晚餐花費</button>
+        <span>·</span>
+        <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="明天八曜 9:30-14:00 備註早班開門">排八曜開門班</button>
+      </div>
+    </div>
 
     <!-- 頂部薪資核心總覽：僅在【整月上班月曆】時顯示 -->
     <div id="salaryHeaderSection" class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -161,7 +191,7 @@
     <div id="pageSettings" class="glass-card p-6 rounded-2xl max-w-2xl mx-auto space-y-5 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h2 class="font-bold text-white flex items-center gap-2 text-base">
-          <i class="fa-regular fa-calendar-plus text-emerald-400"></i> 單日排班設定
+          <i class="fa-regular fa-calendar-plus text-emerald-400"></i> 單日手動排班設定
         </h2>
         <button id="openBatchModalBtn" class="text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
           <i class="fa-solid fa-calendar-days"></i> 多選日曆排班
@@ -214,7 +244,6 @@
           <input type="number" id="shiftHours" step="0.5" min="0.5" max="24" value="4.5" required class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
         </div>
 
-        <!-- 備註事項 -->
         <div>
           <label class="text-xs text-slate-400">排班備註事項</label>
           <input type="text" id="shiftNote" placeholder="例如：早班開門、補貨、店長考核..." class="w-full mt-1 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500">
@@ -235,8 +264,6 @@
     <!-- 頁面 3：即時打卡 (顯示當日上班時間，無薪資卡片) -->
     <!-- ========================================== -->
     <div id="pagePunch" class="space-y-6 hidden">
-      
-      <!-- 當日打卡與排班即時摘要 -->
       <div class="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-emerald-500 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">今日排班與執勤動態</span>
@@ -265,7 +292,6 @@
             </div>
           </div>
 
-          <!-- 選擇打卡職位 -->
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="punchJobRadio" value="A" checked class="peer sr-only">
@@ -321,7 +347,6 @@
           </div>
         </div>
 
-        <!-- 打卡狀態卡片 -->
         <div class="glass-card p-6 rounded-2xl flex flex-col justify-between space-y-4">
           <div class="border-b border-slate-800 pb-3">
             <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">當前打卡狀態</span>
@@ -626,6 +651,218 @@
     shiftDate.value = new Date().toISOString().slice(0, 10);
     document.getElementById('expenseDate').value = new Date().toISOString().slice(0, 10);
 
+    // ========================================================
+    // AI 智慧助理核心解析邏輯 (意圖判斷：排班 / 記帳)
+    // ========================================================
+    const aiAssistantForm = document.getElementById('aiAssistantForm');
+    const aiInput = document.getElementById('aiInput');
+
+    document.querySelectorAll('.ai-quick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        aiInput.value = btn.getAttribute('data-text');
+        handleAiInput(aiInput.value);
+      });
+    });
+
+    aiAssistantForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = aiInput.value.trim();
+      if (!text) return;
+      handleAiInput(text);
+    });
+
+    function handleAiInput(text) {
+      const lowerText = text.toLowerCase();
+      // 判定是否為記帳意圖 (包含「花、買、元、$、超商、餐、吃、刷、信用卡、現金、支出」等關鍵字)
+      const isExpenseIntent = /(花|買|元|\$|吃飯|超商|手搖|飲料|餐|信用卡|現金|刷卡|支出)/.test(text) && /\d+/.test(text) && !/(班|店|八曜|inn)/i.test(text);
+
+      if (isExpenseIntent) {
+        parseAndSaveExpenseAI(text);
+      } else {
+        parseAndSaveShiftAI(text);
+      }
+    }
+
+    // --- AI 自動解析記帳 ---
+    function parseAndSaveExpenseAI(text) {
+      const today = new Date();
+      let dateStr = today.toISOString().slice(0, 10);
+
+      // 日期解析
+      if (text.includes("昨天")) {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        dateStr = d.toISOString().slice(0, 10);
+      } else if (text.includes("前天")) {
+        const d = new Date();
+        d.setDate(d.getDate() - 2);
+        dateStr = d.toISOString().slice(0, 10);
+      } else {
+        const dateMatch = text.match(/(\d{1,2})[\/\-\.月](\d{1,2})/);
+        if (dateMatch) {
+          const m = String(dateMatch[1]).padStart(2, '0');
+          const d = String(dateMatch[2]).padStart(2, '0');
+          dateStr = `${today.getFullYear()}-${m}-${d}`;
+        }
+      }
+
+      // 金額解析 (找緊隨在花、買或數字後面的金額)
+      let amount = 0;
+      const amtMatch = text.match(/(?:花|買|了|\$|\s)?(\d+)(?:\s?元|\s?塊)?/);
+      if (amtMatch) {
+        // 從整段字串擷取最合理的純數字
+        const allNums = text.match(/\d+/g);
+        if (allNums && allNums.length > 0) {
+          // 排除日期月日後的第一個數字通常是金額
+          amount = parseFloat(allNums[allNums.length - 1]);
+        }
+      }
+      if (!amount || amount <= 0) {
+        alert("⚠️ AI 無法辨識金額，請確認句子中是否有輸入花費數字（例如：花127元）");
+        return;
+      }
+
+      // 支付方式
+      let payment = "現金";
+      if (/(信用卡|刷卡|卡)/.test(text)) payment = "信用卡";
+
+      // 類別推斷
+      let category = "其他";
+      if (/(超商|7-11|全家|萊爾富|ok)/i.test(text)) category = "超商";
+      else if (/(飯|餐|麵|吃|麥當勞|肯德基|便當|火鍋)/.test(text)) category = "吃飯";
+      else if (/(茶|手搖|可不可|星巴克|五十嵐|清心|飲料)/.test(text)) category = "手搖";
+      else if (/(捷運|公車|計程車|uber|高鐵|火車|悠遊卡|交通|加油)/i.test(text)) category = "交通";
+      else if (/(遊戲|玩|電影|唱歌|ktv|娛樂)/.test(text)) category = "娛樂";
+      else if (/(日用|衛生紙|洗髮|沐浴|買菜)/.test(text)) category = "日用";
+
+      // 備註擷取
+      let note = "";
+      const noteMatch = text.match(/(?:買|吃|喝)(.+?)(?:花|\d+|$|用)/);
+      if (noteMatch) {
+        note = noteMatch[1].trim();
+      } else {
+        note = text;
+      }
+
+      expensesCol.add({
+        date: dateStr,
+        payment,
+        category,
+        amount,
+        note,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        aiInput.value = "";
+        alert(`🎉 AI 智慧記帳成功！\n日期：${dateStr}\n類別：[${category}] ${note}\n金額：$${amount} (${payment})`);
+        setActiveTab(tabExpenseBtn, pageExpense);
+      });
+    }
+
+    // --- AI 自動解析排班 (支援 11/2 3 7 9 多天) ---
+    function parseAndSaveShiftAI(text) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+
+      // 1. 解析工作單位
+      let job = "A";
+      let jobName = "八曜和茶";
+      if (/(大安|daan)/i.test(text)) {
+        job = "B_DAAN";
+        jobName = "INN CAFE 大安店";
+      } else if (/(成都|chengdu)/i.test(text)) {
+        job = "B_CHENGDU";
+        jobName = "INN CAFE 成都店";
+      } else if (/(inn|咖啡)/i.test(text)) {
+        job = "B_DAAN";
+        jobName = "INN CAFE 大安店";
+      }
+
+      // 2. 解析時間 (例如 11:00-21:00 或 11:00~21:00 或 11到21)
+      let startTime = "";
+      let endTime = "";
+      let hours = 4.5;
+      let timeSlot = "";
+
+      const timeRangeMatch = text.match(/(\d{1,2}(?::\d{2})?)\s*(?:-|~|到|至)\s*(\d{1,2}(?::\d{2})?)/);
+      if (timeRangeMatch) {
+        let t1 = timeRangeMatch[1];
+        let t2 = timeRangeMatch[2];
+        if (!t1.includes(':')) t1 = `${t1.padStart(2, '0')}:00`;
+        if (!t2.includes(':')) t2 = `${t2.padStart(2, '0')}:00`;
+
+        startTime = t1;
+        endTime = t2;
+        timeSlot = `${startTime}-${endTime}`;
+
+        const [sH, sM] = startTime.split(':').map(Number);
+        const [eH, eM] = endTime.split(':').map(Number);
+        let diff = (eH * 60 + eM) - (sH * 60 + sM);
+        if (diff < 0) diff += 24 * 60;
+        // 預設自動扣除 30 分鐘休息不支薪
+        diff = Math.max(0, diff - 30);
+        hours = Math.round((diff / 60) * 10) / 10;
+      } else {
+        const hoursMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:小時|h)/i);
+        if (hoursMatch) {
+          hours = parseFloat(hoursMatch[1]);
+        }
+      }
+
+      // 3. 解析多日期 (例如 11/2 3 7 9 或 11/2、11/3)
+      const datesToSave = [];
+      const monthDayCluster = text.match(/(\d{1,2})[\/\-月]([\d\s,、號日]+)/);
+
+      if (monthDayCluster) {
+        const m = String(monthDayCluster[1]).padStart(2, '0');
+        const daysPart = monthDayCluster[2];
+        const dayMatches = daysPart.match(/\d+/g);
+        if (dayMatches) {
+          dayMatches.forEach(d => {
+            datesToSave.push(`${currentYear}-${m}-${String(d).padStart(2, '0')}`);
+          });
+        }
+      } else if (text.includes("今天")) {
+        datesToSave.push(now.toISOString().slice(0, 10));
+      } else if (text.includes("明天")) {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        datesToSave.push(d.toISOString().slice(0, 10));
+      }
+
+      if (datesToSave.length === 0) {
+        alert("⚠️ AI 未能辨別日期，請確認輸入格式（例如：11/2 3 7 9 或 11/2）");
+        return;
+      }
+
+      // 4. 解析備註
+      let note = "";
+      const noteMatch = text.match(/(?:備註|備注|note)[:：\s]?([^\s]+)/i);
+      if (noteMatch) {
+        note = noteMatch[1];
+      }
+
+      // 5. 批次寫入 Firebase 雲端資料庫
+      const batch = db.batch();
+      datesToSave.forEach(date => {
+        const newDoc = shiftsCol.doc();
+        batch.set(newDoc, {
+          date,
+          job,
+          hours,
+          timeSlot,
+          note,
+          restDeducted: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+
+      batch.commit().then(() => {
+        aiInput.value = "";
+        alert(`🎉 AI 已成功為您建立 ${datesToSave.length} 筆排班！\n單位：${jobName}\n時間：${timeSlot || hours + 'h (已扣除30分休息)'}\n日期：${datesToSave.join(', ')}`);
+        setActiveTab(tabCalendarBtn, pageCalendar);
+      });
+    }
+
     // --- 頁面分頁切換控制（依需求：僅月曆顯示頂部薪資卡片） ---
     function setActiveTab(activeBtn, activePage) {
       [tabCalendarBtn, tabSettingsBtn, tabPunchBtn, tabExpenseBtn].forEach(b => {
@@ -636,7 +873,6 @@
       activeBtn.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-emerald-500 text-emerald-400 transition whitespace-nowrap";
       activePage.classList.remove('hidden');
 
-      // 只有在整月上班月曆時才顯示頂部薪資卡片
       if (activePage === pageCalendar) {
         salaryHeaderSection.classList.remove('hidden');
         renderMonthlyCalendar();
@@ -1051,14 +1287,11 @@
         }
       });
 
-      // 總花費更新至圓餅圖頂部
       document.getElementById('chartTotalExpense').textContent = `$${totalExpense.toLocaleString()}`;
 
-      // 基準薪資
       const baseSalary = window.latestGrossTotal || 0;
       document.getElementById('expenseBaseSalary').textContent = `$${Math.round(baseSalary).toLocaleString()}`;
 
-      // 60% 預算上限與 30% 儲蓄
       const maxExpenseBudget = Math.round(baseSalary * 0.6);
       const savingsTarget = Math.round(baseSalary * 0.3);
       const projectedSavings = Math.max(0, baseSalary - totalExpense);
@@ -1087,7 +1320,6 @@
 
       renderPieChart(categoryMap, totalExpense);
 
-      // 明細清單
       document.getElementById('expenseCountBadge').textContent = `${filteredExpenses.length} 筆`;
       const listEl = document.getElementById('expensesList');
       if (filteredExpenses.length === 0) {
