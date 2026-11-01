@@ -36,7 +36,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 雲端同步中
             </span>
           </div>
-          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ 財務管理</p>
+          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ 獨立勞健保試算</p>
         </div>
       </div>
 
@@ -93,64 +93,115 @@
       </div>
     </div>
 
-    <!-- 頂部薪資核心總覽：僅在【整月上班月曆】時顯示 -->
+    <!-- ========================================== -->
+    <!-- 頂部薪資核心總覽：獨立拆分勞健保與發薪試算 -->
+    <!-- ========================================== -->
     <div id="salaryHeaderSection" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="glass-card md:col-span-2 p-5 rounded-2xl relative overflow-hidden">
-        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">當月預估應發總薪資 (未扣勞健保前)</div>
-        <div class="flex items-baseline gap-2">
-          <span class="text-3xl sm:text-4xl font-extrabold text-emerald-400" id="grandGrossPay">$0</span>
-          <span class="text-xs text-slate-400">實領約: <span id="grandNetPay" class="text-slate-300 font-medium">$0</span></span>
+      
+      <!-- 總合應發與實領卡片 -->
+      <div class="glass-card md:col-span-2 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start">
+            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">當月預估應發總薪資 (未扣勞健保前)</div>
+            <div class="text-[11px] text-slate-400 flex items-center gap-1">
+              <span>健保掛在:</span>
+              <select id="healthInsuranceBelong" class="bg-slate-800 border border-slate-700 text-slate-200 rounded px-1.5 py-0.5 text-[10px]">
+                <option value="AUTO">自動(薪高者)</option>
+                <option value="A">八曜和茶</option>
+                <option value="B">INN CAFE</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-3xl sm:text-4xl font-extrabold text-emerald-400" id="grandGrossPay">$0</span>
+            <span class="text-xs text-slate-400">總實領約: <span id="grandNetPay" class="text-slate-200 font-bold">$0</span></span>
+          </div>
         </div>
+
         <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800 text-center text-xs">
           <div><div class="text-slate-400">總排班天數</div><div class="font-bold text-slate-200 mt-0.5" id="totalDays">0 天</div></div>
           <div><div class="text-slate-400">總累計工時</div><div class="font-bold text-slate-200 mt-0.5" id="totalHours">0.0 h</div></div>
-          <div><div class="text-slate-400">勞健保預扣</div><div class="font-bold text-rose-400 mt-0.5" id="totalDeduction">-$0</div></div>
+          <div><div class="text-slate-400">兩店預扣總和</div><div class="font-bold text-rose-400 mt-0.5" id="totalDeduction">-$0</div></div>
         </div>
       </div>
 
-      <!-- 八曜和茶卡片 -->
-      <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-500">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">八曜和茶</span>
-          <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="aLateToggle" class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0">
-            <span>遲到鎖定210</span>
-          </label>
+      <!-- 八曜和茶卡片 (獨立勞保/健保/實領) -->
+      <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">八曜和茶</span>
+            <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" id="aLateToggle" class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0">
+              <span>遲到鎖定210</span>
+            </label>
+          </div>
+          <div class="mt-2.5">
+            <div class="text-2xl font-bold text-white flex items-baseline justify-between">
+              <span id="payA">$0</span>
+              <span class="text-xs text-slate-400 font-normal">實領 <b id="netPayA" class="text-emerald-300 font-mono">$0</b></span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1 flex justify-between">
+              <span>工時: <b id="hoursA" class="text-slate-200">0.0</b> h</span>
+              <span id="rateBadgeA" class="text-amber-400">時薪 $210</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div id="bonusProgressA" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-0 transition-all"></div>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1" id="bonusTipA">距 230 門檻差 70.0 小時</div>
+          </div>
         </div>
-        <div class="mt-3">
-          <div class="text-2xl font-bold text-white" id="payA">$0</div>
-          <div class="text-xs text-slate-400 mt-1 flex justify-between">
-            <span>工時: <b id="hoursA" class="text-slate-200">0.0</b> h</span>
-            <span id="rateBadgeA" class="text-amber-400">時薪 $210</span>
+
+        <!-- 獨立扣繳明細 -->
+        <div class="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+          <div class="flex justify-between">
+            <span>八曜勞保扣繳:</span>
+            <span id="deductLaborA" class="text-rose-400 font-mono">-$0</span>
           </div>
-          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2.5 overflow-hidden">
-            <div id="bonusProgressA" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-0 transition-all"></div>
+          <div class="flex justify-between">
+            <span>八曜健保扣繳:</span>
+            <span id="deductHealthA" class="text-rose-400 font-mono">-$0</span>
           </div>
-          <div class="text-[11px] text-slate-400 mt-1" id="bonusTipA">距 230 門檻差 70.0 小時</div>
         </div>
       </div>
 
-      <!-- INN CAFE (合併大安與成都) -->
-      <div class="glass-card p-5 rounded-2xl border-l-4 border-l-amber-500">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">INN CAFE (大安+成都)</span>
-          <span class="text-xs text-slate-400">$200/hr + 1.34x</span>
-        </div>
-        <div class="mt-3">
-          <div class="text-2xl font-bold text-white" id="payInn">$0</div>
-          <div class="text-xs text-slate-400 mt-1 flex justify-between">
-            <span>大安: <b id="hoursInnDaAn" class="text-sky-300">0.0</b>h</span>
-            <span>成都: <b id="hoursInnChengdu" class="text-amber-300">0.0</b>h</span>
+      <!-- INN CAFE 卡片 (大安+成都 獨立勞保/健保/實領) -->
+      <div class="glass-card p-5 rounded-2xl border-l-4 border-l-amber-500 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">INN CAFE (大安+成都)</span>
+            <span class="text-xs text-slate-400">$200/hr + 1.34x</span>
           </div>
-          <div class="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-800/80">
-            常規 9.5h 班薪資為 <span class="text-amber-300 font-medium">$2,002</span>
+          <div class="mt-2.5">
+            <div class="text-2xl font-bold text-white flex items-baseline justify-between">
+              <span id="payInn">$0</span>
+              <span class="text-xs text-slate-400 font-normal">實領 <b id="netPayInn" class="text-amber-300 font-mono">$0</b></span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1 flex justify-between">
+              <span>大安: <b id="hoursInnDaAn" class="text-sky-300">0.0</b>h</span>
+              <span>成都: <b id="hoursInnChengdu" class="text-amber-300">0.0</b>h</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-2">
+              加班時數: <b id="otHoursInn" class="text-amber-400 font-mono">0.0</b> h
+            </div>
+          </div>
+        </div>
+
+        <!-- 獨立扣繳明細 -->
+        <div class="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+          <div class="flex justify-between">
+            <span>INN 勞保扣繳:</span>
+            <span id="deductLaborInn" class="text-rose-400 font-mono">-$0</span>
+          </div>
+          <div class="flex justify-between">
+            <span>INN 健保扣繳:</span>
+            <span id="deductHealthInn" class="text-rose-400 font-mono">-$0</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 1：整月上班月曆 + 當日卡片抽屜 -->
+    <!-- 頁面 1：整月上班月曆 (含一鍵匯出 CSV 按鈕) -->
     <!-- ========================================== -->
     <div id="pageCalendar" class="space-y-4">
       <div class="glass-card p-3 sm:p-5 rounded-2xl space-y-3">
@@ -159,12 +210,19 @@
             <h2 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
               <i class="fa-solid fa-calendar-day text-emerald-400"></i> 整月上班月曆
             </h2>
-            <p class="text-[11px] text-slate-400">點選任一日期，下方即可展開大字詳細卡片、編輯或刪除</p>
+            <p class="text-[11px] text-slate-400">點選任一日期，下方展開詳細卡片編輯或刪除</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2 text-[11px]">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> 八曜</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-500 inline-block"></span> INN大安</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span> INN成都</span>
+
+          <div class="flex items-center gap-2">
+            <!-- 一鍵匯出本月 CSV / Excel 報表按鈕 -->
+            <button id="exportCsvBtn" class="text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+              <i class="fa-solid fa-file-excel text-emerald-400"></i> 匯出本月報表 (CSV)
+            </button>
+            <div class="hidden sm:flex items-center gap-2 text-[11px] pl-2 border-l border-slate-800">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> 八曜</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-500 inline-block"></span> INN大安</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span> INN成都</span>
+            </div>
           </div>
         </div>
 
@@ -518,9 +576,7 @@
 
   </main>
 
-  <!-- ========================================== -->
-  <!-- 班表編輯 Modal (點擊直接修改，免刪除) -->
-  <!-- ========================================== -->
+  <!-- 班表編輯 Modal -->
   <div id="editShiftModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -666,6 +722,7 @@
     const punchCol = db.collection("punch_status");
     const expensesCol = db.collection("expenses");
 
+    // 台灣勞保/健保投保分級表
     const BRACKETS = [
       11100, 12540, 13500, 15840, 16500, 17280, 17880, 19047, 20008, 21009,
       22000, 23100, 24000, 25250, 26400, 27470, 27600, 28800, 30300, 31800,
@@ -680,12 +737,14 @@
     let expenseChartInstance = null;
     let activeDrawerDate = null;
 
-    // DOM 引用
+    // DOM 元素引用
     const monthPicker = document.getElementById('monthPicker');
     const shiftDate = document.getElementById('shiftDate');
     const aLateToggle = document.getElementById('aLateToggle');
+    const healthInsuranceBelong = document.getElementById('healthInsuranceBelong');
     const monthlyScheduleGrid = document.getElementById('monthlyScheduleGrid');
     const salaryHeaderSection = document.getElementById('salaryHeaderSection');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
 
     const tabCalendarBtn = document.getElementById('tabCalendarBtn');
     const tabSettingsBtn = document.getElementById('tabSettingsBtn');
@@ -726,6 +785,128 @@
     monthPicker.value = currentMonth;
     shiftDate.value = new Date().toISOString().slice(0, 10);
     document.getElementById('expenseDate').value = new Date().toISOString().slice(0, 10);
+
+    // ==========================================
+    // 核心升級 A：一鍵匯出本月 CSV / Excel 報表
+    // ==========================================
+    exportCsvBtn.addEventListener('click', () => {
+      const filteredShifts = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
+      if (filteredShifts.length === 0) {
+        alert(`${currentMonth} 目前尚無排班資料可匯出！`);
+        return;
+      }
+
+      // 依日期排序
+      filteredShifts.sort((a, b) => a.date.localeCompare(b.date));
+
+      // 計算時薪標準
+      let hoursA = 0;
+      filteredShifts.forEach(s => { if (s.job === 'A') hoursA += Number(s.hours) || 0; });
+      const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
+
+      const weekMap = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      
+      // CSV 表頭
+      let csvContent = "\uFEFF"; // UTF-8 BOM 防 Excel 亂碼
+      csvContent += "排班日期,星期,工作單位,工作時間段,工時(小時),當日預估薪資,備註事項\r\n";
+
+      let totalH = 0;
+      let totalP = 0;
+
+      filteredShifts.forEach(s => {
+        const isA = s.job === 'A';
+        const isDaAn = s.job === 'B_DAAN';
+        const jobName = isA ? '八曜和茶' : (isDaAn ? 'INN CAFE 大安店' : 'INN CAFE 成都店');
+        const dObj = new Date(s.date);
+        const wStr = weekMap[dObj.getDay()] || '';
+        const h = Number(s.hours) || 0;
+
+        let pay = 0;
+        if (isA) {
+          pay = h * rateA;
+        } else {
+          const reg = Math.min(8, h);
+          const ot = Math.max(0, h - 8);
+          pay = (reg * 200) + (ot * 200 * 1.34);
+        }
+
+        totalH += h;
+        totalP += pay;
+
+        const safeNote = `"${(s.note || '').replace(/"/g, '""')}"`;
+        const timeText = `"${s.timeSlot || ''}"`;
+
+        csvContent += `${s.date},${wStr},${jobName},${timeText},${h},${Math.round(pay)},${safeNote}\r\n`;
+      });
+
+      // 結尾加總列
+      csvContent += `總計,,全部門市,,${totalH.toFixed(1)},${Math.round(totalP)},"總應發薪資未扣勞健保"\r\n`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `小廖班表報表_${currentMonth}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+
+    // ==========================================
+    // 核心升級 B：門市獨立計算勞保與健保試算公式
+    // ==========================================
+    function getBracket(salary) {
+      if (!salary || salary <= 0) return 0;
+      let bracket = BRACKETS[0];
+      for (let b of BRACKETS) {
+        if (salary <= b) { bracket = b; break; }
+        bracket = b;
+      }
+      return bracket;
+    }
+
+    function calculateIndependentInsurance(payA, payInn) {
+      // 1. 八曜勞保
+      const bracketA = getBracket(payA);
+      const laborA = Math.round(bracketA * 0.12 * 0.20);
+
+      // 2. INN 勞保 (大安+成都合算)
+      const bracketInn = getBracket(payInn);
+      const laborInn = Math.round(bracketInn * 0.12 * 0.20);
+
+      // 3. 健保歸屬決定 (通常跟隨主要工作)
+      const belongSetting = healthInsuranceBelong.value;
+      let healthOnA = false;
+
+      if (belongSetting === 'A') healthOnA = true;
+      else if (belongSetting === 'B') healthOnA = false;
+      else {
+        // AUTO: 薪水高者投保健保
+        healthOnA = payA >= payInn;
+      }
+
+      let healthA = 0;
+      let healthInn = 0;
+
+      if (healthOnA) {
+        if (payA > 0) healthA = Math.round(bracketA * 0.0517 * 0.30);
+      } else {
+        if (payInn > 0) healthInn = Math.round(bracketInn * 0.0517 * 0.30);
+      }
+
+      return {
+        laborA,
+        healthA,
+        totalDeductA: laborA + healthA,
+        laborInn,
+        healthInn,
+        totalDeductInn: laborInn + healthInn,
+        grandDeduction: laborA + healthA + laborInn + healthInn
+      };
+    }
+
+    healthInsuranceBelong.addEventListener('change', render);
 
     // ==========================================
     // AI 智慧助理核心解析（支援口語時間）
@@ -818,7 +999,6 @@
       });
     }
 
-    // 口語時間轉換輔助
     function normalizeTimeStr(tStr, isPMHint) {
       tStr = tStr.replace(/(點|時)/, ':').replace(/分/, '');
       if (!tStr.includes(':')) tStr = `${tStr}:00`;
@@ -850,7 +1030,6 @@
       let hours = 4.5;
       let timeSlot = "";
 
-      // 支援「下午2點到晚上10點」或「11:00-21:00」
       const oralTimeMatch = text.match(/(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)\s*(?:-|~|到|至)\s*(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)/);
 
       if (oralTimeMatch) {
@@ -870,7 +1049,7 @@
         const [eH, eM] = endTime.split(':').map(Number);
         let diff = (eH * 60 + eM) - (sH * 60 + sM);
         if (diff < 0) diff += 24 * 60;
-        diff = Math.max(0, diff - 30); // 預設自動扣除 30 分鐘休息
+        diff = Math.max(0, diff - 30);
         hours = Math.round((diff / 60) * 10) / 10;
       }
 
@@ -902,7 +1081,6 @@
       const noteMatch = text.match(/(?:備註|備注|note)[:：\s]?([^\s]+)/i);
       if (noteMatch) note = noteMatch[1];
 
-      // 防呆提醒：檢查是否已有班表
       const duplicateDates = datesToSave.filter(d => shifts.some(s => s.date === d && s.job === job));
       if (duplicateDates.length > 0) {
         if (!confirm(`⚠️ 提醒：日期 [${duplicateDates.join(', ')}] 已排過【${jobName}】，確定要重複排班嗎？`)) {
@@ -972,8 +1150,7 @@
         diffMinutes = Math.max(0, diffMinutes - 30);
       }
 
-      let calculated = Math.round((diffMinutes / 60) * 10) / 10;
-      shiftHoursInput.value = calculated;
+      shiftHoursInput.value = Math.round((diffMinutes / 60) * 10) / 10;
       autoCalcTip.classList.remove('hidden');
     }
 
@@ -1084,7 +1261,6 @@
         ? `${startTimeInput.value}-${endTimeInput.value}` 
         : '';
 
-      // 防呆檢查
       const duplicate = shifts.find(s => s.date === date && s.job === job);
       if (duplicate) {
         if (!confirm(`⚠️ 提醒：${date} 已有相同單位的排班紀錄，確定要重複新增嗎？`)) {
@@ -1116,9 +1292,7 @@
       alert('排班已成功儲存！');
     });
 
-    // ==========================================
-    // 月曆渲染 + 點擊展開當日卡片抽屜
-    // ==========================================
+    // --- 月曆渲染 ---
     function renderMonthlyCalendar() {
       monthlyScheduleGrid.innerHTML = '';
       const [year, month] = currentMonth.split('-').map(Number);
@@ -1147,7 +1321,6 @@
             : (dayShifts.length > 0 ? 'bg-slate-800/80 border-slate-700 shadow-sm hover:border-slate-500' : 'bg-slate-900/40 border-slate-800/50 hover:bg-slate-800/40')
         }`;
 
-        // 點擊整格展開當日卡片
         cell.addEventListener('click', () => {
           openDayDrawer(dStr);
           renderMonthlyCalendar();
@@ -1192,7 +1365,7 @@
       }
     }
 
-    // 展開當日詳細大字卡片抽屜
+    // 展開當日詳細卡片抽屜
     function openDayDrawer(dateStr) {
       activeDrawerDate = dateStr;
       selectedDateTitle.textContent = `${dateStr} 班表詳細資訊`;
@@ -1214,10 +1387,9 @@
           let jobName = isA ? '八曜和茶' : (isDaAn ? 'INN CAFE 大安店' : 'INN CAFE 成都店');
           let tagClass = isA ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : (isDaAn ? 'bg-sky-500/20 text-sky-300 border-sky-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
 
-          // 計算當日預估薪資
           let dayPay = 0;
           if (isA) {
-            dayPay = s.hours * 210; // 八曜基礎 210
+            dayPay = s.hours * 210;
           } else {
             const reg = Math.min(8, s.hours);
             const ot = Math.max(0, s.hours - 8);
@@ -1268,9 +1440,7 @@
       setActiveTab(tabSettingsBtn, pageSettings);
     };
 
-    // ==========================================
-    // 編輯班表 Modal 功能
-    // ==========================================
+    // 編輯班表 Modal
     window.openEditModal = function(id) {
       const s = shifts.find(item => item.id === id);
       if (!s) return;
@@ -1728,7 +1898,9 @@
       });
     });
 
-    // --- 核心薪資結算 ---
+    // ==========================================
+    // 核心薪資與獨立門市勞健保結算
+    // ==========================================
     function render() {
       const filteredShifts = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
 
@@ -1755,34 +1927,33 @@
       });
 
       const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
-      const payA = hoursA * rateA;
-      const payInn = (regHoursInn * 200) + (otHoursInn * 200 * 1.34);
+      const payA = hoursA * rateA; // 八曜應發
+      const payInn = (regHoursInn * 200) + (otHoursInn * 200 * 1.34); // INN應發
       const grossTotal = payA + payInn;
       window.latestGrossTotal = grossTotal;
 
-      let bracket = BRACKETS[0];
-      for (let b of BRACKETS) {
-        if (grossTotal <= b) { bracket = b; break; }
-        bracket = b;
-      }
-      if (grossTotal === 0) bracket = 0;
+      // 獨立勞健保試算
+      const insResult = calculateIndependentInsurance(payA, payInn);
+      const netPayA = Math.max(0, payA - insResult.totalDeductA);
+      const netPayInn = Math.max(0, payInn - insResult.totalDeductInn);
+      const grandNetPay = netPayA + netPayInn;
 
-      const labor = Math.round(bracket * 0.12 * 0.20);
-      const health = Math.round(bracket * 0.0517 * 0.30);
-      const deduction = labor + health;
-      const netTotal = Math.max(0, grossTotal - deduction);
-
+      // 頂部大數字
       document.getElementById('grandGrossPay').textContent = `$${Math.round(grossTotal).toLocaleString()}`;
-      document.getElementById('grandNetPay').textContent = `$${Math.round(netTotal).toLocaleString()}`;
+      document.getElementById('grandNetPay').textContent = `$${Math.round(grandNetPay).toLocaleString()}`;
       document.getElementById('totalDays').textContent = `${filteredShifts.length} 天`;
       document.getElementById('totalHours').textContent = `${(hoursA + hoursInnDaAn + hoursInnChengdu).toFixed(1)} h`;
-      document.getElementById('totalDeduction').textContent = `-$${deduction.toLocaleString()}`;
+      document.getElementById('totalDeduction').textContent = `-$${insResult.grandDeduction.toLocaleString()}`;
 
-      // 八曜
+      // 八曜和茶狀態與獨立扣除
       document.getElementById('payA').textContent = `$${Math.round(payA).toLocaleString()}`;
+      document.getElementById('netPayA').textContent = `$${Math.round(netPayA).toLocaleString()}`;
       document.getElementById('hoursA').textContent = hoursA.toFixed(1);
       document.getElementById('rateBadgeA').textContent = `時薪 $${rateA}`;
       document.getElementById('rateBadgeA').className = rateA === 230 ? 'text-emerald-400 font-bold' : 'text-amber-400';
+
+      document.getElementById('deductLaborA').textContent = `-$${insResult.laborA.toLocaleString()}`;
+      document.getElementById('deductHealthA').textContent = `-$${insResult.healthA.toLocaleString()}`;
 
       const progress = Math.min(100, (hoursA / 70) * 100);
       document.getElementById('bonusProgressA').style.width = `${progress}%`;
@@ -1797,12 +1968,16 @@
         document.getElementById('bonusTipA').className = 'text-[11px] text-slate-400 mt-1';
       }
 
-      // INN (大安與成都)
+      // INN CAFE (大安與成都) 狀態與獨立扣除
       document.getElementById('payInn').textContent = `$${Math.round(payInn).toLocaleString()}`;
+      document.getElementById('netPayInn').textContent = `$${Math.round(netPayInn).toLocaleString()}`;
       document.getElementById('hoursInnDaAn').textContent = hoursInnDaAn.toFixed(1);
       document.getElementById('hoursInnChengdu').textContent = hoursInnChengdu.toFixed(1);
+      document.getElementById('otHoursInn').textContent = otHoursInn.toFixed(1);
+
+      document.getElementById('deductLaborInn').textContent = `-$${insResult.laborInn.toLocaleString()}`;
+      document.getElementById('deductHealthInn').textContent = `-$${insResult.healthInn.toLocaleString()}`;
     }
   </script>
 </body>
 </html>
-
