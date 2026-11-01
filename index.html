@@ -1,9 +1,22 @@
+這是一份針對剛剛提到的核心痛點，進行全面升級重構的完整 index.html。
+這次補齊的重點功能：
+ * 點擊月曆展開「當日卡片抽屜」：
+   * 解決手機版格子太小、手指容易誤觸的問題。
+   * 點擊月曆上任何一天，下方會立即展開該日的大字卡，清晰列出地點、時間、工時、當日預估薪資與備註。
+ * 完整支援「編輯／修改」班表：
+   * 不用再「打錯先刪除再重排」！點擊卡片旁的「編輯」按鈕，即可直接修改時間、地點、工時與備註並自動存檔更新。
+ * 班表重複排班防呆警告：
+   * 排班時若偵測到當天同一時段已排過相同工作，會跳出提醒避免不小心重複算薪。
+ * AI 輸入強化口語時間辨識：
+   * 支援「下午2點到晚上10點」、「11/2 下午2:00-9:30」等常見口語說法，自動轉成 24 小時制。
+ * 完整保留 Firebase 雲端即時同步：手機電腦依然秒速同步。
+完整程式碼（請直接複製並覆蓋 GitHub 上的 index.html）：
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小廖薪資與財務管理管家 - AI 智慧助理版</title>
+  <title>小廖薪資與財務管理管家</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -36,7 +49,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 雲端同步中
             </span>
           </div>
-          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ AI 智慧管家</p>
+          <p class="text-xs text-slate-400">八曜和茶 ✕ INN CAFE (大安/成都) ✕ 財務管理</p>
         </div>
       </div>
 
@@ -65,15 +78,13 @@
 
   <main class="max-w-6xl mx-auto px-4 mt-5 space-y-5">
 
-    <!-- ========================================== -->
-    <!-- AI 智慧對話助理輸入框 (全站置頂可隨時喚醒) -->
-    <!-- ========================================== -->
+    <!-- AI 智慧對話助理輸入框 -->
     <div class="glass-card p-4 rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-slate-900/90 via-indigo-950/20 to-slate-900/90 shadow-lg">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2 text-xs font-bold text-indigo-400">
           <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> AI 智慧排班與記帳對話框
         </div>
-        <span class="text-[10px] text-slate-400">打字說出排班或花費，自動帶入</span>
+        <span class="text-[10px] text-slate-400">支援口語時間、多天排班與記帳</span>
       </div>
 
       <form id="aiAssistantForm" class="flex gap-2">
@@ -85,14 +96,13 @@
         </button>
       </form>
 
-      <!-- AI 快捷範例點擊帶入 -->
       <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 items-center">
         <span>快捷試試：</span>
         <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="11/2 3 7 9上咖啡大安店 時間是11:00-21:00">批次排大安店班</button>
         <span>·</span>
         <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="今天去超商買晚餐花127 用信用卡">記超商晚餐花費</button>
         <span>·</span>
-        <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="明天八曜 9:30-14:00 備註早班開門">排八曜開門班</button>
+        <button type="button" class="ai-quick-btn hover:text-indigo-300 underline underline-offset-2" data-text="明天八曜 下午2點到晚上10點 備註支援">下午口語班表</button>
       </div>
     </div>
 
@@ -153,40 +163,56 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 1：整月上班月曆 (極簡壓縮版：全顯地點+時間) -->
+    <!-- 頁面 1：整月上班月曆 + 當日卡片抽屜 -->
     <!-- ========================================== -->
-    <div id="pageCalendar" class="glass-card p-3 sm:p-5 rounded-2xl space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800">
-        <div>
-          <h2 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
-            <i class="fa-solid fa-calendar-day text-emerald-400"></i> 整月上班月曆
-          </h2>
-          <p class="text-[11px] text-slate-400">標籤直觀顯示地點與時間，點擊標籤可查看完整備註或刪除</p>
+    <div id="pageCalendar" class="space-y-4">
+      <div class="glass-card p-3 sm:p-5 rounded-2xl space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800">
+          <div>
+            <h2 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+              <i class="fa-solid fa-calendar-day text-emerald-400"></i> 整月上班月曆
+            </h2>
+            <p class="text-[11px] text-slate-400">點選任一日期，下方即可展開大字詳細卡片、編輯或刪除</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-[11px]">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> 八曜</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-500 inline-block"></span> INN大安</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span> INN成都</span>
+          </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2 text-[11px]">
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> 八曜</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-500 inline-block"></span> INN大安</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span> INN成都</span>
+
+        <!-- 星期表頭 -->
+        <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[11px] font-bold text-slate-400">
+          <div class="py-1 bg-slate-900/60 rounded text-rose-400">日</div>
+          <div class="py-1 bg-slate-900/60 rounded">一</div>
+          <div class="py-1 bg-slate-900/60 rounded">二</div>
+          <div class="py-1 bg-slate-900/60 rounded">三</div>
+          <div class="py-1 bg-slate-900/60 rounded">四</div>
+          <div class="py-1 bg-slate-900/60 rounded">五</div>
+          <div class="py-1 bg-slate-900/60 rounded text-rose-400">六</div>
         </div>
+
+        <!-- 緊湊月曆網格 -->
+        <div id="monthlyScheduleGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5"></div>
       </div>
 
-      <!-- 星期表頭 (緊湊) -->
-      <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[11px] font-bold text-slate-400">
-        <div class="py-1 bg-slate-900/60 rounded text-rose-400">日</div>
-        <div class="py-1 bg-slate-900/60 rounded">一</div>
-        <div class="py-1 bg-slate-900/60 rounded">二</div>
-        <div class="py-1 bg-slate-900/60 rounded">三</div>
-        <div class="py-1 bg-slate-900/60 rounded">四</div>
-        <div class="py-1 bg-slate-900/60 rounded">五</div>
-        <div class="py-1 bg-slate-900/60 rounded text-rose-400">六</div>
+      <!-- 點擊日期後展開的「當日班表詳細卡片抽屜」 -->
+      <div id="dayDrawerCard" class="glass-card p-5 rounded-2xl border border-slate-700/80 space-y-3 hidden">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-emerald-400"></i>
+            <h3 class="font-bold text-white text-sm sm:text-base" id="selectedDateTitle">2026-11-02 班表詳情</h3>
+          </div>
+          <button id="closeDrawerBtn" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800">
+            <i class="fa-solid fa-xmark"></i> 關閉
+          </button>
+        </div>
+        <div id="dayDrawerContent" class="space-y-2"></div>
       </div>
-
-      <!-- 緊湊月曆網格 -->
-      <div id="monthlyScheduleGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5"></div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 2：排班設定 (無頂部薪資卡片) -->
+    <!-- 頁面 2：排班設定 (手動單日) -->
     <!-- ========================================== -->
     <div id="pageSettings" class="glass-card p-6 rounded-2xl max-w-2xl mx-auto space-y-5 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -213,7 +239,6 @@
           </select>
         </div>
 
-        <!-- 上班時間段區間 -->
         <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
           <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
             <i class="fa-regular fa-clock text-amber-400"></i> 上班時間段 (自動推算工時)
@@ -261,7 +286,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 3：即時打卡 (顯示當日上班時間，無薪資卡片) -->
+    <!-- 頁面 3：即時打卡 -->
     <!-- ========================================== -->
     <div id="pagePunch" class="space-y-6 hidden">
       <div class="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-emerald-500 flex flex-wrap items-center justify-between gap-3">
@@ -378,11 +403,9 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 4：支出記帳 (順序：1.圓餅圖 ➔ 2.新增支出 ➔ 3.預算控管) -->
+    <!-- 頁面 4：支出記帳 (1.圓餅圖 ➔ 2.新增支出 ➔ 3.預算控管) -->
     <!-- ========================================== -->
     <div id="pageExpense" class="space-y-6 hidden">
-      
-      <!-- 1. 最上方：每月花費類別佔比圓餅圖 -->
       <div class="glass-card p-5 rounded-2xl">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
@@ -404,10 +427,7 @@
         </div>
       </div>
 
-      <!-- 2. 中間：新增每日支出與支出明細列表 -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- 記帳輸入卡片 -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
           <h3 class="font-bold text-white flex items-center gap-2 text-sm">
             <i class="fa-solid fa-receipt text-emerald-400"></i> 新增每日支出
@@ -457,7 +477,6 @@
           </form>
         </div>
 
-        <!-- 支出明細列表 -->
         <div class="glass-card lg:col-span-2 p-5 rounded-2xl flex flex-col h-[400px]">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <h3 class="font-bold text-white flex items-center gap-2 text-sm">
@@ -468,10 +487,8 @@
 
           <div class="overflow-y-auto flex-1 mt-3 space-y-2 pr-1" id="expensesList"></div>
         </div>
-
       </div>
 
-      <!-- 3. 最下方：財務儲蓄 (30%) 與 60% 消費預算控管區塊 -->
       <div class="glass-card p-5 rounded-2xl space-y-4">
         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-3">
           <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -481,7 +498,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- 60% 支出上限警戒線 -->
           <div class="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
             <div class="flex justify-between text-xs">
               <span class="text-slate-300 font-medium">當月累積支出 (花費上限 60%)</span>
@@ -493,7 +509,6 @@
             <div id="expenseWarningTip" class="text-[11px] text-emerald-400">花費控制良好，未超過預算上限！</div>
           </div>
 
-          <!-- 30% 強迫儲蓄目標 -->
           <div class="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
             <div>
               <div class="flex justify-between text-xs">
@@ -512,14 +527,73 @@
           </div>
         </div>
       </div>
-
     </div>
 
   </main>
 
   <!-- ========================================== -->
-  <!-- 多選日曆排班 Modal (含時間選擇與扣除休息) -->
+  <!-- 班表編輯 Modal (點擊直接修改，免刪除) -->
   <!-- ========================================== -->
+  <div id="editShiftModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-pen text-emerald-400"></i> 修改排班資料
+        </h3>
+        <button id="closeEditModalBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="editShiftForm" class="space-y-3">
+        <input type="hidden" id="editShiftId">
+
+        <div>
+          <label class="text-xs text-slate-400">排班日期</label>
+          <input type="date" id="editShiftDate" required class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100">
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-400">工作單位</label>
+          <select id="editJobSelect" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100">
+            <option value="A">八曜和茶</option>
+            <option value="B_DAAN">INN CAFE 大安店</option>
+            <option value="B_CHENGDU">INN CAFE 成都店</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-[11px] text-slate-400">開始時間</span>
+            <input type="time" id="editStartTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400">結束時間</span>
+            <input type="time" id="editEndTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-400">工時 (小時)</label>
+          <input type="number" id="editShiftHours" step="0.5" min="0.5" max="24" required class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono">
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-400">備註事項</label>
+          <input type="text" id="editShiftNote" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="deleteInEditBtn" class="w-1/3 py-2 text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-xl transition">
+            刪除本筆
+          </button>
+          <button type="submit" class="w-2/3 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow transition">
+            儲存修改
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 多選日曆排班 Modal -->
   <div id="batchModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 space-y-4">
       <div class="flex justify-between items-center">
@@ -539,7 +613,6 @@
       </div>
       <div id="batchCalendarGrid" class="grid grid-cols-7 gap-1.5"></div>
 
-      <!-- 批量排班：時間段與扣休設定 -->
       <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 space-y-2">
         <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
           <i class="fa-regular fa-clock text-amber-400"></i> 設定批量上班時間段
@@ -588,7 +661,7 @@
 
   <script>
     // ========================================================
-    // Firebase 金鑰配置 (完整綁定你的專案)
+    // Firebase 金鑰配置
     // ========================================================
     const firebaseConfig = {
       apiKey: "AIzaSyDyy9UpsT8EkoloQTiP9BQRPQoLyMXiCjM",
@@ -618,8 +691,9 @@
     let selectedDates = new Set();
     let isLate = false;
     let expenseChartInstance = null;
+    let activeDrawerDate = null;
 
-    // DOM 元素引用
+    // DOM 引用
     const monthPicker = document.getElementById('monthPicker');
     const shiftDate = document.getElementById('shiftDate');
     const aLateToggle = document.getElementById('aLateToggle');
@@ -636,6 +710,10 @@
     const pagePunch = document.getElementById('pagePunch');
     const pageExpense = document.getElementById('pageExpense');
 
+    const dayDrawerCard = document.getElementById('dayDrawerCard');
+    const dayDrawerContent = document.getElementById('dayDrawerContent');
+    const selectedDateTitle = document.getElementById('selectedDateTitle');
+
     const startTimeInput = document.getElementById('startTime');
     const endTimeInput = document.getElementById('endTime');
     const shiftHoursInput = document.getElementById('shiftHours');
@@ -647,13 +725,24 @@
     const batchDeductRest = document.getElementById('batchDeductRest');
     const batchHoursInput = document.getElementById('batchHours');
 
+    // 編輯 Modal
+    const editShiftModal = document.getElementById('editShiftModal');
+    const editShiftForm = document.getElementById('editShiftForm');
+    const editShiftId = document.getElementById('editShiftId');
+    const editShiftDate = document.getElementById('editShiftDate');
+    const editJobSelect = document.getElementById('editJobSelect');
+    const editStartTime = document.getElementById('editStartTime');
+    const editEndTime = document.getElementById('editEndTime');
+    const editShiftHours = document.getElementById('editShiftHours');
+    const editShiftNote = document.getElementById('editShiftNote');
+
     monthPicker.value = currentMonth;
     shiftDate.value = new Date().toISOString().slice(0, 10);
     document.getElementById('expenseDate').value = new Date().toISOString().slice(0, 10);
 
-    // ========================================================
-    // AI 智慧助理核心解析邏輯 (意圖判斷：排班 / 記帳)
-    // ========================================================
+    // ==========================================
+    // AI 智慧助理核心解析（支援口語時間）
+    // ==========================================
     const aiAssistantForm = document.getElementById('aiAssistantForm');
     const aiInput = document.getElementById('aiInput');
 
@@ -672,8 +761,6 @@
     });
 
     function handleAiInput(text) {
-      const lowerText = text.toLowerCase();
-      // 判定是否為記帳意圖 (包含「花、買、元、$、超商、餐、吃、刷、信用卡、現金、支出」等關鍵字)
       const isExpenseIntent = /(花|買|元|\$|吃飯|超商|手搖|飲料|餐|信用卡|現金|刷卡|支出)/.test(text) && /\d+/.test(text) && !/(班|店|八曜|inn)/i.test(text);
 
       if (isExpenseIntent) {
@@ -683,12 +770,10 @@
       }
     }
 
-    // --- AI 自動解析記帳 ---
     function parseAndSaveExpenseAI(text) {
       const today = new Date();
       let dateStr = today.toISOString().slice(0, 10);
 
-      // 日期解析
       if (text.includes("昨天")) {
         const d = new Date();
         d.setDate(d.getDate() - 1);
@@ -706,27 +791,20 @@
         }
       }
 
-      // 金額解析 (找緊隨在花、買或數字後面的金額)
       let amount = 0;
-      const amtMatch = text.match(/(?:花|買|了|\$|\s)?(\d+)(?:\s?元|\s?塊)?/);
-      if (amtMatch) {
-        // 從整段字串擷取最合理的純數字
-        const allNums = text.match(/\d+/g);
-        if (allNums && allNums.length > 0) {
-          // 排除日期月日後的第一個數字通常是金額
-          amount = parseFloat(allNums[allNums.length - 1]);
-        }
+      const allNums = text.match(/\d+/g);
+      if (allNums && allNums.length > 0) {
+        amount = parseFloat(allNums[allNums.length - 1]);
       }
+
       if (!amount || amount <= 0) {
-        alert("⚠️ AI 無法辨識金額，請確認句子中是否有輸入花費數字（例如：花127元）");
+        alert("⚠️ AI 無法辨識金額，請輸入花費金額（例如：花127元）");
         return;
       }
 
-      // 支付方式
       let payment = "現金";
       if (/(信用卡|刷卡|卡)/.test(text)) payment = "信用卡";
 
-      // 類別推斷
       let category = "其他";
       if (/(超商|7-11|全家|萊爾富|ok)/i.test(text)) category = "超商";
       else if (/(飯|餐|麵|吃|麥當勞|肯德基|便當|火鍋)/.test(text)) category = "吃飯";
@@ -735,14 +813,9 @@
       else if (/(遊戲|玩|電影|唱歌|ktv|娛樂)/.test(text)) category = "娛樂";
       else if (/(日用|衛生紙|洗髮|沐浴|買菜)/.test(text)) category = "日用";
 
-      // 備註擷取
       let note = "";
       const noteMatch = text.match(/(?:買|吃|喝)(.+?)(?:花|\d+|$|用)/);
-      if (noteMatch) {
-        note = noteMatch[1].trim();
-      } else {
-        note = text;
-      }
+      note = noteMatch ? noteMatch[1].trim() : text;
 
       expensesCol.add({
         date: dateStr,
@@ -753,17 +826,25 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         aiInput.value = "";
-        alert(`🎉 AI 智慧記帳成功！\n日期：${dateStr}\n類別：[${category}] ${note}\n金額：$${amount} (${payment})`);
+        alert(`🎉 AI 記帳成功！\n日期：${dateStr}\n項目：[${category}] ${note}\n金額：$${amount} (${payment})`);
         setActiveTab(tabExpenseBtn, pageExpense);
       });
     }
 
-    // --- AI 自動解析排班 (支援 11/2 3 7 9 多天) ---
+    // 口語時間轉換輔助
+    function normalizeTimeStr(tStr, isPMHint) {
+      tStr = tStr.replace(/(點|時)/, ':').replace(/分/, '');
+      if (!tStr.includes(':')) tStr = `${tStr}:00`;
+      let [h, m] = tStr.split(':').map(Number);
+      if (isNaN(m)) m = 0;
+      if (isPMHint && h < 12) h += 12;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
     function parseAndSaveShiftAI(text) {
       const now = new Date();
       const currentYear = now.getFullYear();
 
-      // 1. 解析工作單位
       let job = "A";
       let jobName = "八曜和茶";
       if (/(大安|daan)/i.test(text)) {
@@ -777,45 +858,41 @@
         jobName = "INN CAFE 大安店";
       }
 
-      // 2. 解析時間 (例如 11:00-21:00 或 11:00~21:00 或 11到21)
       let startTime = "";
       let endTime = "";
       let hours = 4.5;
       let timeSlot = "";
 
-      const timeRangeMatch = text.match(/(\d{1,2}(?::\d{2})?)\s*(?:-|~|到|至)\s*(\d{1,2}(?::\d{2})?)/);
-      if (timeRangeMatch) {
-        let t1 = timeRangeMatch[1];
-        let t2 = timeRangeMatch[2];
-        if (!t1.includes(':')) t1 = `${t1.padStart(2, '0')}:00`;
-        if (!t2.includes(':')) t2 = `${t2.padStart(2, '0')}:00`;
+      // 支援「下午2點到晚上10點」或「11:00-21:00」
+      const oralTimeMatch = text.match(/(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)\s*(?:-|~|到|至)\s*(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)/);
 
-        startTime = t1;
-        endTime = t2;
+      if (oralTimeMatch) {
+        const p1 = oralTimeMatch[1] || "";
+        const t1 = oralTimeMatch[2];
+        const p2 = oralTimeMatch[3] || "";
+        const t2 = oralTimeMatch[4];
+
+        const isP1 = /下午|晚上/.test(p1);
+        const isP2 = /下午|晚上/.test(p2) || (/下午|晚上/.test(p1) && !/早上|上午/.test(p2));
+
+        startTime = normalizeTimeStr(t1, isP1);
+        endTime = normalizeTimeStr(t2, isP2);
         timeSlot = `${startTime}-${endTime}`;
 
         const [sH, sM] = startTime.split(':').map(Number);
         const [eH, eM] = endTime.split(':').map(Number);
         let diff = (eH * 60 + eM) - (sH * 60 + sM);
         if (diff < 0) diff += 24 * 60;
-        // 預設自動扣除 30 分鐘休息不支薪
-        diff = Math.max(0, diff - 30);
+        diff = Math.max(0, diff - 30); // 預設自動扣除 30 分鐘休息
         hours = Math.round((diff / 60) * 10) / 10;
-      } else {
-        const hoursMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:小時|h)/i);
-        if (hoursMatch) {
-          hours = parseFloat(hoursMatch[1]);
-        }
       }
 
-      // 3. 解析多日期 (例如 11/2 3 7 9 或 11/2、11/3)
       const datesToSave = [];
       const monthDayCluster = text.match(/(\d{1,2})[\/\-月]([\d\s,、號日]+)/);
 
       if (monthDayCluster) {
         const m = String(monthDayCluster[1]).padStart(2, '0');
-        const daysPart = monthDayCluster[2];
-        const dayMatches = daysPart.match(/\d+/g);
+        const dayMatches = monthDayCluster[2].match(/\d+/g);
         if (dayMatches) {
           dayMatches.forEach(d => {
             datesToSave.push(`${currentYear}-${m}-${String(d).padStart(2, '0')}`);
@@ -830,18 +907,22 @@
       }
 
       if (datesToSave.length === 0) {
-        alert("⚠️ AI 未能辨別日期，請確認輸入格式（例如：11/2 3 7 9 或 11/2）");
+        alert("⚠️ AI 未能辨別日期，請確認輸入（例如：11/2 3 7 9 或 明天）");
         return;
       }
 
-      // 4. 解析備註
       let note = "";
       const noteMatch = text.match(/(?:備註|備注|note)[:：\s]?([^\s]+)/i);
-      if (noteMatch) {
-        note = noteMatch[1];
+      if (noteMatch) note = noteMatch[1];
+
+      // 防呆提醒：檢查是否已有班表
+      const duplicateDates = datesToSave.filter(d => shifts.some(s => s.date === d && s.job === job));
+      if (duplicateDates.length > 0) {
+        if (!confirm(`⚠️ 提醒：日期 [${duplicateDates.join(', ')}] 已排過【${jobName}】，確定要重複排班嗎？`)) {
+          return;
+        }
       }
 
-      // 5. 批次寫入 Firebase 雲端資料庫
       const batch = db.batch();
       datesToSave.forEach(date => {
         const newDoc = shiftsCol.doc();
@@ -863,7 +944,7 @@
       });
     }
 
-    // --- 頁面分頁切換控制（依需求：僅月曆顯示頂部薪資卡片） ---
+    // --- 分頁切換控制 ---
     function setActiveTab(activeBtn, activePage) {
       [tabCalendarBtn, tabSettingsBtn, tabPunchBtn, tabExpenseBtn].forEach(b => {
         b.className = "flex-1 sm:flex-none sm:px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap";
@@ -889,7 +970,7 @@
     tabPunchBtn.addEventListener('click', () => setActiveTab(tabPunchBtn, pagePunch));
     tabExpenseBtn.addEventListener('click', () => setActiveTab(tabExpenseBtn, pageExpense));
 
-    // --- 單筆上下班時間推算工時 (自動扣 30 分鐘) ---
+    // --- 單筆時間自動計算 ---
     function calculateHoursByTime() {
       const start = startTimeInput.value;
       const end = endTimeInput.value;
@@ -913,7 +994,7 @@
     endTimeInput.addEventListener('change', calculateHoursByTime);
     manualDeductRest.addEventListener('change', calculateHoursByTime);
 
-    // --- 批量多選日曆：時間推算工時 (自動扣 30 分鐘) ---
+    // --- 批量排班時間計算 ---
     function calculateBatchHoursByTime() {
       const start = batchStartTime.value;
       const end = batchEndTime.value;
@@ -928,15 +1009,29 @@
         diffMinutes = Math.max(0, diffMinutes - 30);
       }
 
-      let calculated = Math.round((diffMinutes / 60) * 10) / 10;
-      batchHoursInput.value = calculated;
+      batchHoursInput.value = Math.round((diffMinutes / 60) * 10) / 10;
     }
 
     batchStartTime.addEventListener('change', calculateBatchHoursByTime);
     batchEndTime.addEventListener('change', calculateBatchHoursByTime);
     batchDeductRest.addEventListener('change', calculateBatchHoursByTime);
 
-    // --- 雲端即時監聽排班 ---
+    // --- 編輯彈窗時間計算 ---
+    function calculateEditHours() {
+      const start = editStartTime.value;
+      const end = editEndTime.value;
+      if (!start || !end) return;
+      const [sH, sM] = start.split(':').map(Number);
+      const [eH, eM] = end.split(':').map(Number);
+      let diff = (eH * 60 + eM) - (sH * 60 + sM);
+      if (diff < 0) diff += 24 * 60;
+      diff = Math.max(0, diff - 30);
+      editShiftHours.value = Math.round((diff / 60) * 10) / 10;
+    }
+    editStartTime.addEventListener('change', calculateEditHours);
+    editEndTime.addEventListener('change', calculateEditHours);
+
+    // --- 雲端監聽排班 ---
     shiftsCol.onSnapshot((snapshot) => {
       shifts = [];
       snapshot.forEach((doc) => {
@@ -944,11 +1039,12 @@
       });
       render();
       renderMonthlyCalendar();
+      if (activeDrawerDate) openDayDrawer(activeDrawerDate);
       renderTodayScheduleInfo();
       renderExpenses();
     });
 
-    // --- 雲端即時監聽支出 ---
+    // --- 雲端監聽支出 ---
     expensesCol.onSnapshot((snapshot) => {
       expenses = [];
       snapshot.forEach((doc) => {
@@ -970,7 +1066,7 @@
     }
     listenSettings();
 
-    // INN 快捷鍵
+    // 快捷鍵
     document.getElementById('quick95Btn').addEventListener('click', () => {
       document.getElementById('jobSelect').value = 'B_DAAN';
       shiftHoursInput.value = '9.5';
@@ -990,7 +1086,7 @@
       settingsCol.doc(currentMonth).set({ isLate: e.target.checked }, { merge: true });
     });
 
-    // 新增單筆排班
+    // 單日手動排班存檔
     document.getElementById('singleShiftForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const date = shiftDate.value;
@@ -1000,6 +1096,14 @@
       const timeSlot = (startTimeInput.value && endTimeInput.value) 
         ? `${startTimeInput.value}-${endTimeInput.value}` 
         : '';
+
+      // 防呆檢查
+      const duplicate = shifts.find(s => s.date === date && s.job === job);
+      if (duplicate) {
+        if (!confirm(`⚠️ 提醒：${date} 已有相同單位的排班紀錄，確定要重複新增嗎？`)) {
+          return;
+        }
+      }
 
       shiftsCol.add({
         date,
@@ -1025,7 +1129,9 @@
       alert('排班已成功儲存！');
     });
 
-    // --- 整月上班月曆：超緊湊排版 (全部顯示地點 + 時間) ---
+    // ==========================================
+    // 月曆渲染 + 點擊展開當日卡片抽屜
+    // ==========================================
     function renderMonthlyCalendar() {
       monthlyScheduleGrid.innerHTML = '';
       const [year, month] = currentMonth.split('-').map(Number);
@@ -1045,13 +1151,20 @@
         const dayShifts = filteredShifts.filter(s => s.date === dStr);
         const dayOfWeek = new Date(year, month - 1, day).getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isSelected = activeDrawerDate === dStr;
 
         const cell = document.createElement('div');
-        cell.className = `compressed-cell rounded-lg border flex flex-col justify-between transition ${
-          dayShifts.length > 0 
-            ? 'bg-slate-800/80 border-slate-700 shadow-sm' 
-            : 'bg-slate-900/40 border-slate-800/50'
+        cell.className = `compressed-cell rounded-lg border flex flex-col justify-between transition cursor-pointer ${
+          isSelected 
+            ? 'ring-2 ring-emerald-400 bg-slate-800 border-emerald-500'
+            : (dayShifts.length > 0 ? 'bg-slate-800/80 border-slate-700 shadow-sm hover:border-slate-500' : 'bg-slate-900/40 border-slate-800/50 hover:bg-slate-800/40')
         }`;
+
+        // 點擊整格展開當日卡片
+        cell.addEventListener('click', () => {
+          openDayDrawer(dStr);
+          renderMonthlyCalendar();
+        });
 
         let shiftsHtml = '';
         if (dayShifts.length > 0) {
@@ -1072,7 +1185,7 @@
             const timeStr = s.timeSlot ? s.timeSlot : `${s.hours}h`;
 
             return `
-              <div onclick="showShiftDetail('${s.id}')" title="點擊檢視/刪除" class="mt-0.5 px-1 py-0.5 rounded text-[9px] leading-tight font-medium border cursor-pointer truncate ${colorClasses}">
+              <div class="mt-0.5 px-1 py-0.5 rounded text-[9px] leading-tight font-medium border truncate ${colorClasses}">
                 <span class="font-bold">${shortLoc}</span> ${timeStr}
               </div>
             `;
@@ -1092,18 +1205,148 @@
       }
     }
 
-    // 點擊月曆標籤浮現備註與刪除
-    window.showShiftDetail = function(id) {
+    // 展開當日詳細大字卡片抽屜
+    function openDayDrawer(dateStr) {
+      activeDrawerDate = dateStr;
+      selectedDateTitle.textContent = `${dateStr} 班表詳細資訊`;
+      const dayShifts = shifts.filter(s => s.date === dateStr);
+
+      if (dayShifts.length === 0) {
+        dayDrawerContent.innerHTML = `
+          <div class="p-4 bg-slate-800/40 rounded-xl text-center text-xs text-slate-400 flex flex-col items-center gap-2">
+            <span>當天無排班紀錄</span>
+            <button onclick="quickAddShiftForDate('${dateStr}')" class="text-xs text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg border border-emerald-500/30">
+              <i class="fa-solid fa-plus"></i> 為這天手動排班
+            </button>
+          </div>
+        `;
+      } else {
+        dayDrawerContent.innerHTML = dayShifts.map(s => {
+          const isA = s.job === 'A';
+          const isDaAn = s.job === 'B_DAAN';
+          let jobName = isA ? '八曜和茶' : (isDaAn ? 'INN CAFE 大安店' : 'INN CAFE 成都店');
+          let tagClass = isA ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : (isDaAn ? 'bg-sky-500/20 text-sky-300 border-sky-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
+
+          // 計算當日預估薪資
+          let dayPay = 0;
+          if (isA) {
+            dayPay = s.hours * 210; // 八曜基礎 210
+          } else {
+            const reg = Math.min(8, s.hours);
+            const ot = Math.max(0, s.hours - 8);
+            dayPay = (reg * 200) + (ot * 200 * 1.34);
+          }
+
+          return `
+            <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex items-center justify-between gap-3 text-xs">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded font-bold border ${tagClass}">${jobName}</span>
+                  <span class="font-mono text-slate-200 font-semibold">${s.timeSlot || `${s.hours} 小時`}</span>
+                  <span class="text-slate-400 font-mono">(${s.hours}h)</span>
+                </div>
+                <div class="text-[11px] text-slate-300 flex items-center gap-2">
+                  <span>預估當日薪資：<b class="text-emerald-400 font-mono">+$${Math.round(dayPay).toLocaleString()}</b></span>
+                  ${s.note ? `<span class="text-amber-300">· 備註: ${s.note}</span>` : ''}
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="openEditModal('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs flex items-center gap-1 transition">
+                  <i class="fa-solid fa-pen"></i> 編輯
+                </button>
+                <button onclick="deleteShift('${s.id}')" class="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs transition" title="刪除">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('') + `
+          <button onclick="quickAddShiftForDate('${dateStr}')" class="w-full mt-2 py-2 text-xs text-slate-300 bg-slate-800/60 hover:bg-slate-800 rounded-xl border border-slate-700/60 flex items-center justify-center gap-1">
+            <i class="fa-solid fa-plus text-emerald-400"></i> 再新增當天另一班次
+          </button>
+        `;
+      }
+
+      dayDrawerCard.classList.remove('hidden');
+    }
+
+    document.getElementById('closeDrawerBtn').addEventListener('click', () => {
+      dayDrawerCard.classList.add('hidden');
+      activeDrawerDate = null;
+      renderMonthlyCalendar();
+    });
+
+    window.quickAddShiftForDate = function(dateStr) {
+      shiftDate.value = dateStr;
+      setActiveTab(tabSettingsBtn, pageSettings);
+    };
+
+    // ==========================================
+    // 編輯班表 Modal 功能
+    // ==========================================
+    window.openEditModal = function(id) {
       const s = shifts.find(item => item.id === id);
       if (!s) return;
-      let jobName = s.job === 'A' ? '八曜和茶' : (s.job === 'B_DAAN' ? 'INN CAFE 大安店' : 'INN CAFE 成都店');
-      let msg = `【${jobName}】\n排班日期：${s.date}\n工作時間：${s.timeSlot || '無指定時段'}\n時數：${s.hours} 小時\n備註事項：${s.note || '無備註'}\n\n是否確定要刪除這筆排班紀錄？`;
-      if (confirm(msg)) {
+
+      editShiftId.value = s.id;
+      editShiftDate.value = s.date;
+      editJobSelect.value = s.job;
+      editShiftHours.value = s.hours;
+      editShiftNote.value = s.note || '';
+
+      if (s.timeSlot && s.timeSlot.includes('-')) {
+        const parts = s.timeSlot.split('-');
+        editStartTime.value = parts[0];
+        editEndTime.value = parts[1];
+      } else {
+        editStartTime.value = '';
+        editEndTime.value = '';
+      }
+
+      editShiftModal.classList.remove('hidden');
+    };
+
+    document.getElementById('closeEditModalBtn').addEventListener('click', () => {
+      editShiftModal.classList.add('hidden');
+    });
+
+    editShiftForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = editShiftId.value;
+      const date = editShiftDate.value;
+      const job = editJobSelect.value;
+      const hours = parseFloat(editShiftHours.value);
+      const note = editShiftNote.value.trim();
+      const timeSlot = (editStartTime.value && editEndTime.value) ? `${editStartTime.value}-${editEndTime.value}` : '';
+
+      shiftsCol.doc(id).update({
+        date,
+        job,
+        hours,
+        timeSlot,
+        note
+      }).then(() => {
+        editShiftModal.classList.add('hidden');
+        alert('班表已成功更新！');
+      });
+    });
+
+    document.getElementById('deleteInEditBtn').addEventListener('click', () => {
+      const id = editShiftId.value;
+      if (confirm('確定要刪除這筆排班紀錄嗎？')) {
+        shiftsCol.doc(id).delete().then(() => {
+          editShiftModal.classList.add('hidden');
+        });
+      }
+    });
+
+    window.deleteShift = function(id) {
+      if (confirm('確定刪除此排班紀錄？')) {
         shiftsCol.doc(id).delete();
       }
     };
 
-    // --- 即時打卡：顯示當日上班時間 ---
+    // --- 即時打卡摘要 ---
     function renderTodayScheduleInfo() {
       const todayStr = new Date().toISOString().slice(0, 10);
       const todayShifts = shifts.filter(s => s.date === todayStr);
@@ -1237,7 +1480,7 @@
       if (confirm('確定重設打卡狀態？')) punchCol.doc("today").delete();
     });
 
-    // --- 支出記帳模組 (1.圓餅圖 ➔ 2.新增支出 ➔ 3.預算控管) ---
+    // --- 支出記帳模組 ---
     document.getElementById('expenseForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const date = document.getElementById('expenseDate').value;
@@ -1575,3 +1818,4 @@
   </script>
 </body>
 </html>
+
