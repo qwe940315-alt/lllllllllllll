@@ -80,10 +80,11 @@
 
           <div class="bg-slate-900/70 px-3 py-2 rounded-xl border border-slate-800 text-xs flex items-center gap-2">
             <span class="text-slate-400">健保投保歸屬：</span>
-            <select id="healthInsuranceBelong" class="bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1 text-xs focus:outline-none">
-              <option value="AUTO">自動 (薪高者)</option>
-              <option value="A">八曜和茶</option>
+            <select id="healthInsuranceBelong" class="bg-slate-800 border border-slate-700 text-emerald-300 font-semibold rounded px-2 py-1 text-xs focus:outline-none">
+              <option value="A" selected>八曜和茶 (預設)</option>
               <option value="B">INN CAFE</option>
+              <option value="AUTO">自動 (薪高者)</option>
+              <option value="NONE">免扣健保 (依附眷屬)</option>
             </select>
           </div>
         </div>
@@ -144,12 +145,16 @@
 
           <div class="pt-4 border-t border-slate-800 text-xs text-slate-400 space-y-2">
             <div class="flex justify-between">
-              <span>對應投保級距：</span>
-              <span id="bracketA" class="text-slate-200 font-mono">$0</span>
+              <span>勞保級距 / 健保級距：</span>
+              <span id="bracketA" class="text-slate-200 font-mono">$0 / $0</span>
             </div>
             <div class="flex justify-between">
-              <span>八曜勞保 (20%) / 健保 (30%)：</span>
+              <span>自動試算 勞保 / 健保：</span>
               <span><b id="deductLaborA" class="text-rose-400 font-mono">-$0</b> / <b id="deductHealthA" class="text-rose-400 font-mono">-$0</b></span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-slate-400" title="若店方每月固定扣一筆勞健保金額，可填入此欄覆蓋自動試算">自訂固定勞健保扣額 (選填)：</span>
+              <input type="number" id="customDeductAInput" placeholder="預設自動算" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-rose-300 font-mono text-right focus:outline-none focus:border-rose-500">
             </div>
             <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between">
               <span class="text-slate-300 font-medium">發薪實際入帳核對：</span>
@@ -164,7 +169,7 @@
           <div>
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300">INN CAFE (大安店 ＋ 成都店)</span>
-              <span class="text-xs text-slate-400 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800">$200 + 1.34x / 1.67x</span>
+              <span class="text-xs text-slate-400 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800">同日合併算加班</span>
             </div>
 
             <div class="mt-4 flex items-baseline justify-between">
@@ -201,12 +206,16 @@
 
           <div class="pt-4 border-t border-slate-800 text-xs text-slate-400 space-y-2">
             <div class="flex justify-between">
-              <span>對應投保級距：</span>
-              <span id="bracketInn" class="text-slate-200 font-mono">$0</span>
+              <span>勞保級距 / 健保級距：</span>
+              <span id="bracketInn" class="text-slate-200 font-mono">$0 / $0</span>
             </div>
             <div class="flex justify-between">
-              <span>INN 勞保 (20%) / 健保 (30%)：</span>
+              <span>自動試算 勞保 / 健保：</span>
               <span><b id="deductLaborInn" class="text-rose-400 font-mono">-$0</b> / <b id="deductHealthInn" class="text-rose-400 font-mono">-$0</b></span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-slate-400" title="若店方每月固定扣一筆勞健保金額，可填入此欄覆蓋自動試算">自訂固定勞健保扣額 (選填)：</span>
+              <input type="number" id="customDeductInnInput" placeholder="預設自動算" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-rose-300 font-mono text-right focus:outline-none focus:border-rose-500">
             </div>
             <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between">
               <span class="text-slate-300 font-medium">發薪實際入帳核對：</span>
@@ -232,9 +241,12 @@
             <p class="text-[11px] text-slate-400 mt-0.5">點選任一日期格子，下方可展開當日詳細卡片進行編輯或刪除</p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-2">
             <button id="exportCsvBtn" class="text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
-              <i class="fa-solid fa-file-excel text-emerald-400"></i> 匯出本月報表 (CSV)
+              <i class="fa-solid fa-file-excel text-emerald-400"></i> 匯出報表 (CSV)
+            </button>
+            <button id="clearMonthBtn" class="text-xs bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+              <i class="fa-solid fa-trash-can"></i> 清空本月
             </button>
             <div class="hidden sm:flex items-center gap-2.5 text-xs pl-2 border-l border-slate-800">
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> 八曜</span>
@@ -275,7 +287,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 頁面 3：班表設定 (含 AI 快速排班、膠囊快捷、單日與多選排班) -->
+    <!-- 頁面 3：班表設定 (含 AI 快速排班、自訂膠囊快捷、單日與多選排班) -->
     <!-- ========================================== -->
     <div id="pageSettings" class="space-y-5 max-w-2xl mx-auto hidden">
 
@@ -285,11 +297,11 @@
           <div class="flex items-center gap-2 text-xs font-bold text-indigo-400">
             <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> AI 智慧文字快速排班
           </div>
-          <span class="text-[10px] text-slate-400">輸入日期、店別與時間直接批次建檔</span>
+          <span class="text-[10px] text-slate-400">支援「點半」、多日期批次與備註</span>
         </div>
 
         <form id="aiAssistantForm" class="flex gap-2">
-          <input type="text" id="aiInput" placeholder="例如：11/2 3 7 9上咖啡大安店 11:00-21:00 或 明天八曜 下午2點到晚上10點" class="flex-1 bg-slate-950/80 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          <input type="text" id="aiInput" placeholder="例如：11/2 3 7 9上大安店 11:00-21:00 或 明天八曜 下午2點半到晚上10點半 備註 晚班支援" class="flex-1 bg-slate-950/80 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
             AI 排班
           </button>
@@ -307,25 +319,15 @@
           </button>
         </div>
 
-        <!-- 常用班別一鍵膠囊按鈕 -->
+        <!-- 常用班別一鍵膠囊按鈕 (支援自訂編輯) -->
         <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
-          <div class="text-xs text-slate-400">
-            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>常用班別快捷帶入（點擊自動填寫下方表單）：
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button type="button" onclick="applyPresetShift('A', '09:30', '17:30', true, '早班')" class="py-1.5 px-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition">
-              八曜早班 (9:30-17:30)
-            </button>
-            <button type="button" onclick="applyPresetShift('A', '14:30', '22:30', true, '晚班')" class="py-1.5 px-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition">
-              八曜晚班 (14:30-22:30)
-            </button>
-            <button type="button" onclick="applyPresetShift('B_DAAN', '11:00', '21:00', true, '大安常規')" class="py-1.5 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-medium transition">
-              大安 9.5h (11-21)
-            </button>
-            <button type="button" onclick="applyPresetShift('B_CHENGDU', '11:00', '21:00', true, '成都常規')" class="py-1.5 px-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium transition">
-              成都 9.5h (11-21)
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>常用班別快捷帶入（點擊自動填寫下方表單）：</span>
+            <button type="button" id="openPresetModalBtn" class="text-[11px] text-indigo-300 hover:text-indigo-200 flex items-center gap-1">
+              <i class="fa-solid fa-gear"></i> 編輯快捷
             </button>
           </div>
+          <div id="presetButtonsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
         </div>
 
         <form id="singleShiftForm" class="space-y-4">
@@ -393,6 +395,29 @@
     </div>
 
   </main>
+
+  <!-- 自訂常用班別快捷按鈕 Modal -->
+  <div id="presetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-lg w-full p-6 rounded-2xl border border-slate-700 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-bolt text-amber-400"></i> 編輯常用班別快捷鍵
+        </h3>
+        <button id="closePresetModalBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="presetEditList" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button type="button" id="resetPresetDefaultBtn" class="w-1/3 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition">
+          恢復預設
+        </button>
+        <button type="button" id="savePresetsBtn" class="w-2/3 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow transition">
+          儲存快捷設定
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 班表編輯 Modal -->
   <div id="editShiftModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -564,7 +589,7 @@
       }
     }
 
-    // --- 單日薪資計算公式 (含勞基法 1.34x / 1.67x 與國定假日 2x) ---
+    // --- 單筆預覽薪資公式 (供單筆檢視與 CSV 匯出使用，國定雙倍時連同加班費一併以 2 倍計算) ---
     function calcSingleShiftPay(s, rateA) {
       const h = Number(s.hours) || 0;
       const isDouble = !!s.isHolidayDouble;
@@ -574,9 +599,46 @@
         const reg = Math.min(8, h);
         const ot1 = Math.max(0, Math.min(2, h - 8));
         const ot2 = Math.max(0, h - 10);
-        const regRate = isDouble ? 400 : 200;
-        return (reg * regRate) + (ot1 * 200 * 1.34) + (ot2 * 200 * 1.67);
+        if (isDouble) {
+          return (reg * 400) + (ot1 * 200 * 2) + (ot2 * 200 * 2);
+        }
+        return (reg * 200) + (ot1 * 200 * 1.34) + (ot2 * 200 * 1.67);
       }
+    }
+
+    // --- 同日多段班合併計算 INN 薪資與加班時數 (修復同日兩段班吃掉加班費漏洞) ---
+    function calcDailyMergedInnStats(innShifts) {
+      const byDate = {};
+      let hoursInnDaAn = 0, hoursInnChengdu = 0;
+
+      innShifts.forEach(s => {
+        const h = Number(s.hours) || 0;
+        if (s.job === 'B_DAAN') hoursInnDaAn += h;
+        else hoursInnChengdu += h;
+
+        if (!byDate[s.date]) byDate[s.date] = { totalH: 0, isDouble: false };
+        byDate[s.date].totalH += h;
+        if (s.isHolidayDouble) byDate[s.date].isDouble = true;
+      });
+
+      let totalPayInn = 0;
+      let totalOtHoursInn = 0;
+
+      Object.values(byDate).forEach(day => {
+        const h = day.totalH;
+        const reg = Math.min(8, h);
+        const ot1 = Math.max(0, Math.min(2, h - 8));
+        const ot2 = Math.max(0, h - 10);
+        totalOtHoursInn += (ot1 + ot2);
+
+        if (day.isDouble) {
+          totalPayInn += (reg * 400) + ((ot1 + ot2) * 400);
+        } else {
+          totalPayInn += (reg * 200) + (ot1 * 200 * 1.34) + (ot2 * 200 * 1.67);
+        }
+      });
+
+      return { hoursInnDaAn, hoursInnChengdu, totalOtHoursInn, totalPayInn };
     }
 
     // --- Firebase 設定與初始化 ---
@@ -594,18 +656,30 @@
     const shiftsCol = db.collection("shifts");
     const settingsCol = db.collection("settings");
 
-    const BRACKETS = [
+    // 台灣部分工時勞保級距表與健保基本工資下限 ($28,590)
+    const LABOR_BRACKETS = [
       11100, 12540, 13500, 15840, 16500, 17280, 17880, 19047, 20008, 21009,
-      22000, 23100, 24000, 25250, 26400, 27470, 27600, 28800, 30300, 31800,
+      22000, 23100, 24000, 25250, 26400, 27470, 28590, 28800, 30300, 31800,
       33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800
+    ];
+    const HEALTH_MIN_BRACKET = 28590;
+
+    const DEFAULT_PRESETS = [
+      { label: '八曜早班 (9:30-17:30)', job: 'A', start: '09:30', end: '17:30', deductRest: true, note: '早班' },
+      { label: '八曜晚班 (14:30-22:30)', job: 'A', start: '14:30', end: '22:30', deductRest: true, note: '晚班' },
+      { label: '大安 9.5h (11-21)', job: 'B_DAAN', start: '11:00', end: '21:00', deductRest: true, note: '大安常規' },
+      { label: '成都 9.5h (11-21)', job: 'B_CHENGDU', start: '11:00', end: '21:00', deductRest: true, note: '成都常規' }
     ];
 
     let shifts = [];
+    let shiftPresets = [...DEFAULT_PRESETS];
     let currentMonth = getLocalMonthStr();
     let selectedDates = new Set();
     let isLate = false;
     let actualPayA = null;
     let actualPayInn = null;
+    let customDeductA = null;
+    let customDeductInn = null;
     let activeDrawerDate = null;
 
     // DOM 引用
@@ -615,6 +689,8 @@
     const healthInsuranceBelong = document.getElementById('healthInsuranceBelong');
     const actualPayAInput = document.getElementById('actualPayAInput');
     const actualPayInnInput = document.getElementById('actualPayInnInput');
+    const customDeductAInput = document.getElementById('customDeductAInput');
+    const customDeductInnInput = document.getElementById('customDeductInnInput');
     const monthlyScheduleGrid = document.getElementById('monthlyScheduleGrid');
 
     const startTimeInput = document.getElementById('startTime');
@@ -669,22 +745,111 @@
     document.getElementById('tabCalendarBtn').onclick = () => switchTab('tabCalendarBtn', 'pageCalendar');
     document.getElementById('tabSettingsBtn').onclick = () => switchTab('tabSettingsBtn', 'pageSettings');
 
-    // --- 常用班別一鍵膠囊帶入 ---
-    window.applyPresetShift = function(job, start, end, deductRest, note) {
-      document.getElementById('jobSelect').value = job;
-      startTimeInput.value = start;
-      endTimeInput.value = end;
-      manualDeductRest.checked = deductRest;
-      document.getElementById('shiftNote').value = note;
+    // --- 常用班別快捷按鈕渲染與自訂編輯 ---
+    function renderPresetButtons() {
+      const container = document.getElementById('presetButtonsContainer');
+      container.innerHTML = shiftPresets.map((p, i) => {
+        const colorClass = p.job === 'A'
+          ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+          : (p.job === 'B_DAAN'
+            ? 'bg-sky-500/10 hover:bg-sky-500/20 border-sky-500/30 text-sky-300'
+            : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-300');
+        return `
+          <button type="button" onclick="triggerPreset(${i})" class="py-1.5 px-2 rounded-lg border text-xs font-medium transition truncate ${colorClass}">
+            ${p.label}
+          </button>
+        `;
+      }).join('');
+    }
+
+    window.triggerPreset = function(idx) {
+      const p = shiftPresets[idx];
+      if (!p) return;
+      document.getElementById('jobSelect').value = p.job;
+      startTimeInput.value = p.start;
+      endTimeInput.value = p.end;
+      manualDeductRest.checked = p.deductRest !== false;
+      document.getElementById('shiftNote').value = p.note || '';
       calculateHoursByTime();
-      showToast(`已帶入【${note}】時段，確認日期後即可儲存！`);
+      showToast(`已帶入【${p.label}】！`);
     };
 
-    // --- 全域與月份設定監聽 ---
-    settingsCol.doc("global_config").onSnapshot((doc) => {
-      if (doc.exists && doc.data().healthBelong) {
-        healthInsuranceBelong.value = doc.data().healthBelong;
+    const presetModal = document.getElementById('presetModal');
+    document.getElementById('openPresetModalBtn').addEventListener('click', () => {
+      const listEl = document.getElementById('presetEditList');
+      listEl.innerHTML = shiftPresets.map((p, i) => `
+        <div class="p-3 bg-slate-900/70 rounded-xl border border-slate-800 space-y-2 text-xs">
+          <div class="flex justify-between items-center font-bold text-slate-300">
+            <span>快捷鍵 #${i + 1}</span>
+            <label class="flex items-center gap-1 font-normal text-slate-400">
+              <input type="checkbox" id="presetDeduct_${i}" ${p.deductRest !== false ? 'checked' : ''} class="rounded bg-slate-800 text-emerald-500"> 扣休30分
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="presetLabel_${i}" value="${p.label}" placeholder="按鈕顯示名稱" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+            <select id="presetJob_${i}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+              <option value="A" ${p.job === 'A' ? 'selected' : ''}>八曜和茶</option>
+              <option value="B_DAAN" ${p.job === 'B_DAAN' ? 'selected' : ''}>INN 大安店</option>
+              <option value="B_CHENGDU" ${p.job === 'B_CHENGDU' ? 'selected' : ''}>INN 成都店</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <input type="time" id="presetStart_${i}" value="${p.start}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+            <input type="time" id="presetEnd_${i}" value="${p.end}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+            <input type="text" id="presetNote_${i}" value="${p.note || ''}" placeholder="預設備註" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+          </div>
+        </div>
+      `).join('');
+      presetModal.classList.remove('hidden');
+    });
+
+    document.getElementById('closePresetModalBtn').addEventListener('click', () => presetModal.classList.add('hidden'));
+
+    document.getElementById('savePresetsBtn').addEventListener('click', () => {
+      const updated = shiftPresets.map((_, i) => ({
+        label: document.getElementById(`presetLabel_${i}`).value.trim() || `快捷 #${i + 1}`,
+        job: document.getElementById(`presetJob_${i}`).value,
+        start: document.getElementById(`presetStart_${i}`).value,
+        end: document.getElementById(`presetEnd_${i}`).value,
+        deductRest: document.getElementById(`presetDeduct_${i}`).checked,
+        note: document.getElementById(`presetNote_${i}`).value.trim()
+      }));
+      settingsCol.doc("global_config").set({ shiftPresets: updated }, { merge: true }).then(() => {
+        presetModal.classList.add('hidden');
+        showToast('常用班別快捷鍵已更新！');
+      }).catch(checkFirebaseError);
+    });
+
+    document.getElementById('resetPresetDefaultBtn').addEventListener('click', () => {
+      if (confirm('確定要恢復成預設的 4 個快捷班別嗎？')) {
+        settingsCol.doc("global_config").set({ shiftPresets: DEFAULT_PRESETS }, { merge: true }).then(() => {
+          presetModal.classList.add('hidden');
+          showToast('已恢復預設快捷鍵！');
+        }).catch(checkFirebaseError);
       }
+    });
+
+    // --- 全域與月份設定監聽 (健保預設強制歸屬八曜和茶 'A') ---
+    settingsCol.doc("global_config").onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        // 若尚未設定或原本為 AUTO，自動歸屬八曜和茶 'A'
+        if (!data.healthBelong || data.healthBelong === 'AUTO') {
+          healthInsuranceBelong.value = 'A';
+          settingsCol.doc("global_config").set({ healthBelong: 'A' }, { merge: true });
+        } else {
+          healthInsuranceBelong.value = data.healthBelong;
+        }
+        shiftPresets = Array.isArray(data.shiftPresets) && data.shiftPresets.length > 0 ? data.shiftPresets : [...DEFAULT_PRESETS];
+      } else {
+        healthInsuranceBelong.value = 'A';
+        shiftPresets = [...DEFAULT_PRESETS];
+        settingsCol.doc("global_config").set({
+          healthBelong: 'A',
+          shiftPresets: DEFAULT_PRESETS
+        }, { merge: true });
+      }
+      renderPresetButtons();
       render();
     }, checkFirebaseError);
 
@@ -701,14 +866,20 @@
           isLate = !!d.isLate;
           actualPayA = d.actualPayA !== undefined && d.actualPayA !== "" ? Number(d.actualPayA) : null;
           actualPayInn = d.actualPayInn !== undefined && d.actualPayInn !== "" ? Number(d.actualPayInn) : null;
+          customDeductA = d.customDeductA !== undefined && d.customDeductA !== "" ? Number(d.customDeductA) : null;
+          customDeductInn = d.customDeductInn !== undefined && d.customDeductInn !== "" ? Number(d.customDeductInn) : null;
         } else {
           isLate = false;
           actualPayA = null;
           actualPayInn = null;
+          customDeductA = null;
+          customDeductInn = null;
         }
         aLateToggle.checked = isLate;
         actualPayAInput.value = actualPayA !== null ? actualPayA : "";
         actualPayInnInput.value = actualPayInn !== null ? actualPayInn : "";
+        customDeductAInput.value = customDeductA !== null ? customDeductA : "";
+        customDeductInnInput.value = customDeductInn !== null ? customDeductInn : "";
         render();
         renderMonthlyCalendar();
         if (activeDrawerDate) openDayDrawer(activeDrawerDate);
@@ -747,6 +918,16 @@
     actualPayInnInput.addEventListener('change', (e) => {
       const val = e.target.value === "" ? "" : Number(e.target.value);
       settingsCol.doc(currentMonth).set({ actualPayInn: val }, { merge: true }).catch(checkFirebaseError);
+    });
+
+    customDeductAInput.addEventListener('change', (e) => {
+      const val = e.target.value === "" ? "" : Number(e.target.value);
+      settingsCol.doc(currentMonth).set({ customDeductA: val }, { merge: true }).catch(checkFirebaseError);
+    });
+
+    customDeductInnInput.addEventListener('change', (e) => {
+      const val = e.target.value === "" ? "" : Number(e.target.value);
+      settingsCol.doc(currentMonth).set({ customDeductInn: val }, { merge: true }).catch(checkFirebaseError);
     });
 
     // --- 起訖時間自動換算工時 ---
@@ -825,9 +1006,9 @@
       }).catch(checkFirebaseError);
     });
 
-    // --- AI 智慧文字快速排班 ---
+    // --- AI 智慧文字快速排班 (支援「點半」、跨年判斷、空白備註與目標月份自動切換) ---
     function normalizeTimeStr(tStr, isPMHint) {
-      tStr = tStr.replace(/(點|時)/, ':').replace(/分/, '');
+      tStr = tStr.replace(/點半|時半/, ':30').replace(/(點|時)/, ':').replace(/分/, '');
       if (!tStr.includes(':')) tStr = `${tStr}:00`;
       let [h, m] = tStr.split(':').map(Number);
       if (isNaN(m)) m = 0;
@@ -841,7 +1022,7 @@
       if (!text) return;
 
       const now = new Date();
-      const currentYear = now.getFullYear();
+      let targetYear = now.getFullYear();
 
       let job = "A", jobName = "八曜和茶";
       if (/(大安|daan)/i.test(text)) {
@@ -855,7 +1036,7 @@
       const isHolidayDouble = /(國定|雙倍|兩倍|2倍)/.test(text);
       let startTime = "", endTime = "", hours = 4.5, timeSlot = "";
 
-      const oralTimeMatch = text.match(/(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)\s*(?:-|~|到|至)\s*(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|點(?:\d{1,2}(?:分)?)?)?)/);
+      const oralTimeMatch = text.match(/(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|(?:點|時)(?:半|\d{1,2}(?:分)?)?)?)\s*(?:-|~|到|至)\s*(早上|上午|下午|晚上)?\s*(\d{1,2}(?::\d{2}|(?:點|時)(?:半|\d{1,2}(?:分)?)?)?)/);
       if (oralTimeMatch) {
         const p1 = oralTimeMatch[1] || "", t1 = oralTimeMatch[2];
         const p2 = oralTimeMatch[3] || "", t2 = oralTimeMatch[4];
@@ -877,10 +1058,15 @@
       const datesToSave = [];
       const monthDayCluster = text.match(/(\d{1,2})[\/\-月]([\d\s,、號日]+)/);
       if (monthDayCluster) {
-        const m = String(monthDayCluster[1]).padStart(2, '0');
+        const mNum = Number(monthDayCluster[1]);
+        // 跨年智慧判斷：若現在是 11~12 月，輸入 1~2 月班表自動歸入明年
+        if (now.getMonth() + 1 >= 11 && mNum <= 2) {
+          targetYear += 1;
+        }
+        const m = String(mNum).padStart(2, '0');
         const dayMatches = monthDayCluster[2].match(/\d+/g);
         if (dayMatches) {
-          dayMatches.forEach(d => datesToSave.push(`${currentYear}-${m}-${String(d).padStart(2, '0')}`));
+          dayMatches.forEach(d => datesToSave.push(`${targetYear}-${m}-${String(d).padStart(2, '0')}`));
         }
       } else if (text.includes("今天")) {
         datesToSave.push(getLocalTodayStr(now));
@@ -895,10 +1081,24 @@
       }
 
       let note = "";
-      const noteMatch = text.match(/(?:備註|備注|note)[:：\s]?([^\s]+)/i);
-      if (noteMatch) note = noteMatch[1];
+      const noteMatch = text.match(/(?:備註|備注|note)[:：\s]*(.+)$/i);
+      if (noteMatch) note = noteMatch[1].trim();
+
+      // 批次排班重複檢查與覆蓋選擇
+      const existingShifts = shifts.filter(s => datesToSave.includes(s.date) && s.job === job);
+      let overwriteExisting = false;
+      if (existingShifts.length > 0) {
+        const dupDates = [...new Set(existingShifts.map(s => s.date))].join(', ');
+        if (!confirm(`⚠️ 日期 [${dupDates}] 已有【${jobName}】班表！\n按「確定」將直接覆蓋舊班表，按「取消」則中止操作。`)) {
+          return;
+        }
+        overwriteExisting = true;
+      }
 
       const batch = db.batch();
+      if (overwriteExisting) {
+        existingShifts.forEach(s => batch.delete(shiftsCol.doc(s.id)));
+      }
       datesToSave.forEach(date => {
         const newDoc = shiftsCol.doc();
         batch.set(newDoc, {
@@ -910,8 +1110,29 @@
 
       batch.commit().then(() => {
         document.getElementById('aiInput').value = "";
+        const targetM = datesToSave[0].slice(0, 7);
+        if (targetM !== currentMonth) {
+          currentMonth = targetM;
+          monthPicker.value = currentMonth;
+          listenSettings();
+        }
         showToast(`AI 成功建立 ${datesToSave.length} 筆【${jobName}】排班！`);
         switchTab('tabCalendarBtn', 'pageCalendar');
+      }).catch(checkFirebaseError);
+    });
+
+    // --- 一鍵清空當月班表 ---
+    document.getElementById('clearMonthBtn').addEventListener('click', () => {
+      const filtered = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
+      if (filtered.length === 0) return showToast(`${currentMonth} 目前沒有任何排班可清空`, true);
+      if (!confirm(`⚠️ 確定要清空【${currentMonth}】全部共 ${filtered.length} 筆排班紀錄嗎？此操作無法復原。`)) return;
+
+      const batch = db.batch();
+      filtered.forEach(s => batch.delete(shiftsCol.doc(s.id)));
+      batch.commit().then(() => {
+        activeDrawerDate = null;
+        dayDrawerCard.classList.add('hidden');
+        showToast(`已清空 ${currentMonth} 所有班表！`);
       }).catch(checkFirebaseError);
     });
 
@@ -1016,7 +1237,7 @@
                   <span class="text-slate-400 font-mono">(${s.hours}h)</span>
                 </div>
                 <div class="text-[11px] text-slate-300 flex flex-wrap items-center gap-2">
-                  <span>當日預估薪資：<b class="text-emerald-400 font-mono">+$${Math.round(dayPay).toLocaleString()}</b></span>
+                  <span>單筆預估薪資：<b class="text-emerald-400 font-mono">+$${Math.round(dayPay).toLocaleString()}</b></span>
                   ${s.note ? `<span class="text-amber-300">· 備註: ${s.note}</span>` : ''}
                 </div>
               </div>
@@ -1122,7 +1343,7 @@
       const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
 
       const weekMap = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-      let csvContent = "\uFEFF排班日期,星期,工作單位,工作時間段,工時(小時),國定雙倍,當日預估薪資,備註事項\r\n";
+      let csvContent = "\uFEFF排班日期,星期,工作單位,工作時間段,工時(小時),國定雙倍,單筆預估薪資,備註事項\r\n";
 
       let totalH = 0, totalP = 0;
       filteredShifts.forEach(s => {
@@ -1151,7 +1372,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // --- 多選日曆批量排班 ---
+    // --- 多選日曆批量排班 (含重複覆蓋防呆) ---
     document.getElementById('openBatchModalBtn').addEventListener('click', () => {
       selectedDates.clear();
       renderBatchCalendar();
@@ -1217,8 +1438,22 @@
       const note = document.getElementById('batchNote').value.trim();
       const timeSlot = (batchStartTime.value && batchEndTime.value) ? `${batchStartTime.value}-${batchEndTime.value}` : '';
 
+      const datesArr = Array.from(selectedDates);
+      const existing = shifts.filter(s => datesArr.includes(s.date) && s.job === job);
+      let overwrite = false;
+      if (existing.length > 0) {
+        const dupStr = [...new Set(existing.map(s => s.date))].join(', ');
+        if (!confirm(`⚠️ 所選日期 [${dupStr}] 已有同單位班表！\n按「確定」將覆蓋舊班表，按「取消」中止操作。`)) {
+          return;
+        }
+        overwrite = true;
+      }
+
       const batch = db.batch();
-      selectedDates.forEach(date => {
+      if (overwrite) {
+        existing.forEach(s => batch.delete(shiftsCol.doc(s.id)));
+      }
+      datesArr.forEach(date => {
         const newDoc = shiftsCol.doc();
         batch.set(newDoc, {
           date, job, hours, timeSlot, isHolidayDouble, note,
@@ -1232,68 +1467,88 @@
         document.getElementById('batchNote').value = '';
         batchStartTime.value = ''; batchEndTime.value = '';
         batchHolidayDouble.checked = false;
-        showToast(`已成功套用 ${selectedDates.size} 天的排班！`);
+        showToast(`已成功套用 ${datesArr.length} 天的排班！`);
       }).catch(checkFirebaseError);
     });
 
     // --- 勞健保級距與薪資總統計結算 ---
-    function getBracket(salary) {
+    function getLaborBracket(salary) {
       if (!salary || salary <= 0) return 0;
-      let bracket = BRACKETS[0];
-      for (let b of BRACKETS) {
+      let bracket = LABOR_BRACKETS[0];
+      for (let b of LABOR_BRACKETS) {
         if (salary <= b) { bracket = b; break; }
         bracket = b;
       }
       return bracket;
     }
 
+    function getHealthBracket(salary) {
+      if (!salary || salary <= 0) return 0;
+      const raw = getLaborBracket(salary);
+      return Math.max(HEALTH_MIN_BRACKET, raw);
+    }
+
     function calculateIndependentInsurance(payA, payInn) {
-      const bracketA = getBracket(payA);
-      const laborA = Math.round(bracketA * 0.12 * 0.20);
+      const laborBracketA = getLaborBracket(payA);
+      const laborA = Math.round(laborBracketA * 0.12 * 0.20);
 
-      const bracketInn = getBracket(payInn);
-      const laborInn = Math.round(bracketInn * 0.12 * 0.20);
+      const laborBracketInn = getLaborBracket(payInn);
+      const laborInn = Math.round(laborBracketInn * 0.12 * 0.20);
 
-      const belongSetting = healthInsuranceBelong.value;
-      let healthOnA = belongSetting === 'A' ? true : (belongSetting === 'B' ? false : (payA >= payInn));
-
+      const belongSetting = healthInsuranceBelong.value || 'A';
       let healthA = 0, healthInn = 0;
-      if (healthOnA && payA > 0) {
-        healthA = Math.round(bracketA * 0.0517 * 0.30);
-      } else if (!healthOnA && payInn > 0) {
-        healthInn = Math.round(bracketInn * 0.0517 * 0.30);
+      let healthBracketA = 0, healthBracketInn = 0;
+
+      if (belongSetting !== 'NONE') {
+        const healthOnA = belongSetting === 'A' ? true : (belongSetting === 'B' ? false : (payA >= payInn));
+        if (healthOnA) {
+          healthBracketA = payA > 0 ? getHealthBracket(payA) : HEALTH_MIN_BRACKET;
+          healthA = Math.round(healthBracketA * 0.0517 * 0.30);
+        } else {
+          healthBracketInn = payInn > 0 ? getHealthBracket(payInn) : HEALTH_MIN_BRACKET;
+          healthInn = Math.round(healthBracketInn * 0.0517 * 0.30);
+        }
       }
 
+      const finalDeductA = customDeductA !== null ? customDeductA : (laborA + healthA);
+      const finalDeductInn = customDeductInn !== null ? customDeductInn : (laborInn + healthInn);
+
       return {
-        bracketA, laborA, healthA, totalDeductA: laborA + healthA,
-        bracketInn, laborInn, healthInn, totalDeductInn: laborInn + healthInn,
-        grandDeduction: laborA + healthA + laborInn + healthInn
+        laborBracketA, healthBracketA, laborA, healthA, totalDeductA: finalDeductA,
+        laborBracketInn, healthBracketInn, laborInn, healthInn, totalDeductInn: finalDeductInn,
+        grandDeduction: finalDeductA + finalDeductInn
       };
     }
 
     function render() {
       const filteredShifts = shifts.filter(s => s.date && s.date.slice(0, 7) === currentMonth);
 
-      let hoursA = 0, hoursInnDaAn = 0, hoursInnChengdu = 0, otHoursInn = 0;
+      let hoursA = 0;
+      const shiftsA = [];
+      const shiftsInn = [];
 
       filteredShifts.forEach(s => {
         const h = Number(s.hours) || 0;
         if (s.job === 'A') {
           hoursA += h;
+          shiftsA.push(s);
         } else {
-          if (s.job === 'B_DAAN') hoursInnDaAn += h; else hoursInnChengdu += h;
-          if (h > 8) otHoursInn += (h - 8);
+          shiftsInn.push(s);
         }
       });
 
       const rateA = (hoursA > 70 && !isLate) ? 230 : 210;
       window.latestRateA = rateA;
 
-      let payA = 0, payInn = 0;
-      filteredShifts.forEach(s => {
-        const p = calcSingleShiftPay(s, rateA);
-        if (s.job === 'A') payA += p; else payInn += p;
-      });
+      let payA = 0;
+      shiftsA.forEach(s => { payA += calcSingleShiftPay(s, rateA); });
+
+      // 使用同日合併工時計算 INN 薪資與加班費
+      const innStats = calcDailyMergedInnStats(shiftsInn);
+      const payInn = innStats.totalPayInn;
+      const hoursInnDaAn = innStats.hoursInnDaAn;
+      const hoursInnChengdu = innStats.hoursInnChengdu;
+      const otHoursInn = innStats.totalOtHoursInn;
 
       const grossTotal = payA + payInn;
       const insResult = calculateIndependentInsurance(payA, payInn);
@@ -1316,7 +1571,7 @@
         ? 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold'
         : 'px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold';
 
-      document.getElementById('bracketA').textContent = `$${insResult.bracketA.toLocaleString()}`;
+      document.getElementById('bracketA').textContent = `$${insResult.laborBracketA.toLocaleString()} / $${insResult.healthBracketA.toLocaleString()}`;
       document.getElementById('deductLaborA').textContent = `-$${insResult.laborA.toLocaleString()}`;
       document.getElementById('deductHealthA').textContent = `-$${insResult.healthA.toLocaleString()}`;
 
@@ -1341,7 +1596,7 @@
       document.getElementById('otHoursInn').textContent = otHoursInn.toFixed(1);
       document.getElementById('totalHoursInn').textContent = (hoursInnDaAn + hoursInnChengdu).toFixed(1);
 
-      document.getElementById('bracketInn').textContent = `$${insResult.bracketInn.toLocaleString()}`;
+      document.getElementById('bracketInn').textContent = `$${insResult.laborBracketInn.toLocaleString()} / $${insResult.healthBracketInn.toLocaleString()}`;
       document.getElementById('deductLaborInn').textContent = `-$${insResult.laborInn.toLocaleString()}`;
       document.getElementById('deductHealthInn').textContent = `-$${insResult.healthInn.toLocaleString()}`;
 
