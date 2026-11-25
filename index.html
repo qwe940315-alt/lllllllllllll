@@ -541,10 +541,19 @@
 
   <!-- 多選日曆批量排班 Modal -->
   <div id="batchModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 space-y-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 space-y-4 max-h-[92vh] overflow-y-auto">
       <div class="flex justify-between items-center">
         <h3 class="font-bold text-white text-base">月曆多選批量排班</h3>
         <button id="closeBatchModalBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- 批量排班常用快捷鍵 -->
+      <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 space-y-1.5">
+        <div class="flex items-center justify-between text-[11px] text-slate-400">
+          <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>批量快捷帶入：</span>
+          <span class="text-slate-500">點選自動套用班別與時間</span>
+        </div>
+        <div id="batchPresetButtonsContainer" class="grid grid-cols-2 gap-1.5"></div>
       </div>
 
       <div class="flex gap-2">
@@ -837,7 +846,8 @@
     // --- 常用班別快捷按鈕渲染、新增與自訂編輯 ---
     function renderPresetButtons() {
       const container = document.getElementById('presetButtonsContainer');
-      container.innerHTML = shiftPresets.map((p, i) => {
+      const batchContainer = document.getElementById('batchPresetButtonsContainer');
+      const html = shiftPresets.map((p, i) => {
         const jobNormalized = p.job === 'A' ? 'A' : 'B_SONGJANG';
         const colorClass = jobNormalized === 'A'
           ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
@@ -848,6 +858,20 @@
           </button>
         `;
       }).join('');
+      container.innerHTML = html;
+      if (batchContainer) {
+        batchContainer.innerHTML = shiftPresets.map((p, i) => {
+          const jobNormalized = p.job === 'A' ? 'A' : 'B_SONGJANG';
+          const colorClass = jobNormalized === 'A'
+            ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+            : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-300';
+          return `
+            <button type="button" onclick="triggerBatchPreset(${i})" class="py-1.5 px-2 rounded-lg border text-[11px] font-medium transition truncate ${colorClass}">
+              ${p.label}
+            </button>
+          `;
+        }).join('');
+      }
     }
 
     window.triggerPreset = function(idx) {
@@ -860,6 +884,18 @@
       document.getElementById('shiftNote').value = p.note || '';
       calculateHoursByTime();
       showToast(`已帶入【${p.label}】！`);
+    };
+
+    window.triggerBatchPreset = function(idx) {
+      const p = shiftPresets[idx];
+      if (!p) return;
+      document.getElementById('batchJobSelect').value = p.job === 'A' ? 'A' : 'B_SONGJANG';
+      setTimeSelectors(batchStartHour, batchStartMin, p.start);
+      setTimeSelectors(batchEndHour, batchEndMin, p.end);
+      batchDeductRest.checked = p.deductRest !== false;
+      document.getElementById('batchNote').value = p.note || '';
+      calculateBatchHoursByTime();
+      showToast(`批量已帶入【${p.label}】！`);
     };
 
     const presetModal = document.getElementById('presetModal');
@@ -1546,6 +1582,7 @@
     // --- 多選日曆批量排班 ---
     document.getElementById('openBatchModalBtn').addEventListener('click', () => {
       selectedDates.clear();
+      renderPresetButtons();
       renderBatchCalendar();
       document.getElementById('batchModal').classList.remove('hidden');
     });
