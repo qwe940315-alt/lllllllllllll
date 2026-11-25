@@ -338,15 +338,15 @@
           </button>
         </div>
 
-        <!-- 常用班別一鍵膠囊按鈕 (支援自訂編輯) -->
+        <!-- 常用班別一鍵膠囊按鈕 (支援新增與自訂編輯) -->
         <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>常用班別快捷帶入（點擊自動填寫下方表單）：</span>
             <button type="button" id="openPresetModalBtn" class="text-[11px] text-indigo-300 hover:text-indigo-200 flex items-center gap-1">
-              <i class="fa-solid fa-gear"></i> 編輯快捷
+              <i class="fa-solid fa-gear"></i> 新增 / 編輯快捷
             </button>
           </div>
-          <div id="presetButtonsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          <div id="presetButtonsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
         </div>
 
         <form id="singleShiftForm" class="space-y-4">
@@ -366,16 +366,30 @@
 
           <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-3">
             <label class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
-              <i class="fa-regular fa-clock text-amber-400"></i> 上班時間段 (自動推算工時)
+              <i class="fa-regular fa-clock text-amber-400"></i> 上班時間段 (分鐘限定 00 / 30，自動推算工時)
             </label>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <span class="text-[11px] text-slate-400">開始時間</span>
-                <input type="time" id="startTime" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
+                <span class="text-[11px] text-slate-400">開始時間 (時 : 分)</span>
+                <div class="grid grid-cols-2 gap-1.5 mt-1">
+                  <select id="startHour" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 font-mono"></select>
+                  <select id="startMin" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 font-mono">
+                    <option value="">--</option>
+                    <option value="00">00 分</option>
+                    <option value="30">30 分</option>
+                  </select>
+                </div>
               </div>
               <div>
-                <span class="text-[11px] text-slate-400">結束時間</span>
-                <input type="time" id="endTime" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
+                <span class="text-[11px] text-slate-400">結束時間 (時 : 分)</span>
+                <div class="grid grid-cols-2 gap-1.5 mt-1">
+                  <select id="endHour" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 font-mono"></select>
+                  <select id="endMin" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 font-mono">
+                    <option value="">--</option>
+                    <option value="00">00 分</option>
+                    <option value="30">30 分</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
@@ -414,17 +428,21 @@
 
   </main>
 
-  <!-- 自訂常用班別快捷按鈕 Modal -->
+  <!-- 自訂常用班別快捷按鈕 Modal (支援新增 / 編輯 / 刪除) -->
   <div id="presetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glass-card max-w-lg w-full p-6 rounded-2xl border border-slate-700 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="font-bold text-white text-base flex items-center gap-2">
-          <i class="fa-solid fa-bolt text-amber-400"></i> 編輯常用班別快捷鍵
+          <i class="fa-solid fa-bolt text-amber-400"></i> 新增 / 編輯常用班別快捷鍵
         </h3>
         <button id="closePresetModalBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div id="presetEditList" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+
+      <button type="button" id="addPresetRowBtn" class="w-full py-2 text-xs font-semibold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 rounded-xl transition flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-plus"></i> 新增快捷鍵
+      </button>
 
       <div class="flex gap-2 pt-2 border-t border-slate-800">
         <button type="button" id="resetPresetDefaultBtn" class="w-1/3 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition">
@@ -465,12 +483,26 @@
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <span class="text-[11px] text-slate-400">開始時間</span>
-            <input type="time" id="editStartTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+            <span class="text-[11px] text-slate-400">開始時間 (00/30分)</span>
+            <div class="grid grid-cols-2 gap-1 mt-0.5">
+              <select id="editStartHour" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono"></select>
+              <select id="editStartMin" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono">
+                <option value="">--</option>
+                <option value="00">00</option>
+                <option value="30">30</option>
+              </select>
+            </div>
           </div>
           <div>
-            <span class="text-[11px] text-slate-400">結束時間</span>
-            <input type="time" id="editEndTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+            <span class="text-[11px] text-slate-400">結束時間 (00/30分)</span>
+            <div class="grid grid-cols-2 gap-1 mt-0.5">
+              <select id="editEndHour" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono"></select>
+              <select id="editEndMin" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono">
+                <option value="">--</option>
+                <option value="00">00</option>
+                <option value="30">30</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -529,16 +561,30 @@
 
       <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 space-y-2">
         <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-          <i class="fa-regular fa-clock text-amber-400"></i> 設定批量上班時間段
+          <i class="fa-regular fa-clock text-amber-400"></i> 設定批量上班時間段 (00 / 30 分)
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <span class="text-[11px] text-slate-400">開始時間</span>
-            <input type="time" id="batchStartTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+            <div class="grid grid-cols-2 gap-1 mt-0.5">
+              <select id="batchStartHour" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono"></select>
+              <select id="batchStartMin" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono">
+                <option value="">--</option>
+                <option value="00">00</option>
+                <option value="30">30</option>
+              </select>
+            </div>
           </div>
           <div>
             <span class="text-[11px] text-slate-400">結束時間</span>
-            <input type="time" id="batchEndTime" class="w-full mt-0.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-100">
+            <div class="grid grid-cols-2 gap-1 mt-0.5">
+              <select id="batchEndHour" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono"></select>
+              <select id="batchEndMin" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-slate-100 font-mono">
+                <option value="">--</option>
+                <option value="00">00</option>
+                <option value="30">30</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
@@ -584,6 +630,66 @@
     const getLocalMonthStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
     const ORDER_UNIT_PRICE = 500; // 松江一單 $500
+
+    // --- 時間（小時 + 00/30 分鐘）輔助工具 ---
+    function populateHourSelects() {
+      const hourSelectIds = ['startHour', 'endHour', 'editStartHour', 'editEndHour', 'batchStartHour', 'batchEndHour'];
+      const optionsHtml = '<option value="">--時</option>' + Array.from({ length: 24 }, (_, h) => {
+        const hh = String(h).padStart(2, '0');
+        return `<option value="${hh}">${hh} 時</option>`;
+      }).join('');
+      hourSelectIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = optionsHtml;
+      });
+    }
+    populateHourSelects();
+
+    function snapMinuteTo00Or30(mNum) {
+      return Number(mNum) >= 15 && Number(mNum) < 45 ? '30' : '00';
+    }
+
+    function combineTimeFromSelectors(hEl, mEl) {
+      const h = hEl.value;
+      const m = mEl.value;
+      if (!h || !m) return '';
+      return `${h}:${m}`;
+    }
+
+    function setTimeSelectors(hEl, mEl, timeStr) {
+      if (!timeStr || !timeStr.includes(':')) {
+        hEl.value = '';
+        mEl.value = '';
+        return;
+      }
+      const [rawH, rawM] = timeStr.split(':');
+      const hh = String(Number(rawH) || 0).padStart(2, '0');
+      hEl.value = hh;
+      mEl.value = snapMinuteTo00Or30(rawM);
+    }
+
+    function buildPresetTimeControlHtml(prefix, idx, timeStr) {
+      let curH = '', curM = '';
+      if (timeStr && timeStr.includes(':')) {
+        const [rh, rm] = timeStr.split(':');
+        curH = String(Number(rh) || 0).padStart(2, '0');
+        curM = snapMinuteTo00Or30(rm);
+      }
+      const hourOpts = '<option value="">--時</option>' + Array.from({ length: 24 }, (_, h) => {
+        const hh = String(h).padStart(2, '0');
+        return `<option value="${hh}" ${curH === hh ? 'selected' : ''}>${hh}</option>`;
+      }).join('');
+      return `
+        <div class="grid grid-cols-2 gap-1">
+          <select id="preset${prefix}H_${idx}" class="bg-slate-800 border border-slate-700 rounded px-1 py-1 text-slate-100 font-mono">${hourOpts}</select>
+          <select id="preset${prefix}M_${idx}" class="bg-slate-800 border border-slate-700 rounded px-1 py-1 text-slate-100 font-mono">
+            <option value="">--</option>
+            <option value="00" ${curM === '00' ? 'selected' : ''}>00</option>
+            <option value="30" ${curM === '30' ? 'selected' : ''}>30</option>
+          </select>
+        </div>
+      `;
+    }
 
     function showToast(msg, isError = false) {
       const el = document.getElementById('toast');
@@ -648,6 +754,7 @@
 
     let shifts = [];
     let shiftPresets = [...DEFAULT_PRESETS];
+    let draftPresets = [];
     let currentMonth = getLocalMonthStr();
     let selectedDates = new Set();
     let isLate = false;
@@ -669,15 +776,19 @@
     const customDeductAInput = document.getElementById('customDeductAInput');
     const monthlyScheduleGrid = document.getElementById('monthlyScheduleGrid');
 
-    const startTimeInput = document.getElementById('startTime');
-    const endTimeInput = document.getElementById('endTime');
+    const startHour = document.getElementById('startHour');
+    const startMin = document.getElementById('startMin');
+    const endHour = document.getElementById('endHour');
+    const endMin = document.getElementById('endMin');
     const shiftHoursInput = document.getElementById('shiftHours');
     const autoCalcTip = document.getElementById('autoCalcTip');
     const manualDeductRest = document.getElementById('manualDeductRest');
     const shiftHolidayDouble = document.getElementById('shiftHolidayDouble');
 
-    const batchStartTime = document.getElementById('batchStartTime');
-    const batchEndTime = document.getElementById('batchEndTime');
+    const batchStartHour = document.getElementById('batchStartHour');
+    const batchStartMin = document.getElementById('batchStartMin');
+    const batchEndHour = document.getElementById('batchEndHour');
+    const batchEndMin = document.getElementById('batchEndMin');
     const batchDeductRest = document.getElementById('batchDeductRest');
     const batchHolidayDouble = document.getElementById('batchHolidayDouble');
     const batchHoursInput = document.getElementById('batchHours');
@@ -692,8 +803,10 @@
     const editShiftId = document.getElementById('editShiftId');
     const editShiftDate = document.getElementById('editShiftDate');
     const editJobSelect = document.getElementById('editJobSelect');
-    const editStartTime = document.getElementById('editStartTime');
-    const editEndTime = document.getElementById('editEndTime');
+    const editStartHour = document.getElementById('editStartHour');
+    const editStartMin = document.getElementById('editStartMin');
+    const editEndHour = document.getElementById('editEndHour');
+    const editEndMin = document.getElementById('editEndMin');
     const editShiftDeductRest = document.getElementById('editShiftDeductRest');
     const editShiftHours = document.getElementById('editShiftHours');
     const editShiftHolidayDouble = document.getElementById('editShiftHolidayDouble');
@@ -721,7 +834,7 @@
     document.getElementById('tabCalendarBtn').onclick = () => switchTab('tabCalendarBtn', 'pageCalendar');
     document.getElementById('tabSettingsBtn').onclick = () => switchTab('tabSettingsBtn', 'pageSettings');
 
-    // --- 常用班別快捷按鈕渲染與自訂編輯 ---
+    // --- 常用班別快捷按鈕渲染、新增與自訂編輯 ---
     function renderPresetButtons() {
       const container = document.getElementById('presetButtonsContainer');
       container.innerHTML = shiftPresets.map((p, i) => {
@@ -741,8 +854,8 @@
       const p = shiftPresets[idx];
       if (!p) return;
       document.getElementById('jobSelect').value = p.job === 'A' ? 'A' : 'B_SONGJANG';
-      startTimeInput.value = p.start;
-      endTimeInput.value = p.end;
+      setTimeSelectors(startHour, startMin, p.start);
+      setTimeSelectors(endHour, endMin, p.end);
       manualDeductRest.checked = p.deductRest !== false;
       document.getElementById('shiftNote').value = p.note || '';
       calculateHoursByTime();
@@ -750,17 +863,38 @@
     };
 
     const presetModal = document.getElementById('presetModal');
-    document.getElementById('openPresetModalBtn').addEventListener('click', () => {
+
+    function collectDraftPresetsFromDom() {
+      return draftPresets.map((item, i) => {
+        const sH = document.getElementById(`presetSH_${i}`)?.value || '';
+        const sM = document.getElementById(`presetSM_${i}`)?.value || '';
+        const eH = document.getElementById(`presetEH_${i}`)?.value || '';
+        const eM = document.getElementById(`presetEM_${i}`)?.value || '';
+        return {
+          label: document.getElementById(`presetLabel_${i}`)?.value.trim() || `快捷 #${i + 1}`,
+          job: document.getElementById(`presetJob_${i}`)?.value || 'A',
+          start: (sH && sM) ? `${sH}:${sM}` : '',
+          end: (eH && eM) ? `${eH}:${eM}` : '',
+          deductRest: !!document.getElementById(`presetDeduct_${i}`)?.checked,
+          note: document.getElementById(`presetNote_${i}`)?.value.trim() || ''
+        };
+      });
+    }
+
+    function renderPresetEditList() {
       const listEl = document.getElementById('presetEditList');
-      listEl.innerHTML = shiftPresets.map((p, i) => {
+      listEl.innerHTML = draftPresets.map((p, i) => {
         const jobVal = p.job === 'A' ? 'A' : 'B_SONGJANG';
         return `
           <div class="p-3 bg-slate-900/70 rounded-xl border border-slate-800 space-y-2 text-xs">
             <div class="flex justify-between items-center font-bold text-slate-300">
               <span>快捷鍵 #${i + 1}</span>
-              <label class="flex items-center gap-1 font-normal text-slate-400">
-                <input type="checkbox" id="presetDeduct_${i}" ${p.deductRest !== false ? 'checked' : ''} class="rounded bg-slate-800 text-emerald-500"> 扣休30分
-              </label>
+              <div class="flex items-center gap-3">
+                <label class="flex items-center gap-1 font-normal text-slate-400 cursor-pointer">
+                  <input type="checkbox" id="presetDeduct_${i}" ${p.deductRest !== false ? 'checked' : ''} class="rounded bg-slate-800 text-emerald-500"> 扣休30分
+                </label>
+                ${draftPresets.length > 1 ? `<button type="button" onclick="removePresetRow(${i})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+              </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <input type="text" id="presetLabel_${i}" value="${p.label}" placeholder="按鈕顯示名稱" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
@@ -769,28 +903,44 @@
                 <option value="B_SONGJANG" ${jobVal === 'B_SONGJANG' ? 'selected' : ''}>松江</option>
               </select>
             </div>
-            <div class="grid grid-cols-3 gap-2">
-              <input type="time" id="presetStart_${i}" value="${p.start}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
-              <input type="time" id="presetEnd_${i}" value="${p.end}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+              ${buildPresetTimeControlHtml('S', i, p.start)}
+              ${buildPresetTimeControlHtml('E', i, p.end)}
               <input type="text" id="presetNote_${i}" value="${p.note || ''}" placeholder="預設備註" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100">
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    window.removePresetRow = function(idx) {
+      draftPresets = collectDraftPresetsFromDom().filter((_, i) => i !== idx);
+      renderPresetEditList();
+    };
+
+    document.getElementById('addPresetRowBtn').addEventListener('click', () => {
+      draftPresets = collectDraftPresetsFromDom();
+      draftPresets.push({
+        label: `自訂快捷 #${draftPresets.length + 1}`,
+        job: 'B_SONGJANG',
+        start: '09:00',
+        end: '17:30',
+        deductRest: true,
+        note: ''
+      });
+      renderPresetEditList();
+    });
+
+    document.getElementById('openPresetModalBtn').addEventListener('click', () => {
+      draftPresets = shiftPresets.map(p => ({ ...p }));
+      renderPresetEditList();
       presetModal.classList.remove('hidden');
     });
 
     document.getElementById('closePresetModalBtn').addEventListener('click', () => presetModal.classList.add('hidden'));
 
     document.getElementById('savePresetsBtn').addEventListener('click', () => {
-      const updated = shiftPresets.map((_, i) => ({
-        label: document.getElementById(`presetLabel_${i}`).value.trim() || `快捷 #${i + 1}`,
-        job: document.getElementById(`presetJob_${i}`).value,
-        start: document.getElementById(`presetStart_${i}`).value,
-        end: document.getElementById(`presetEnd_${i}`).value,
-        deductRest: document.getElementById(`presetDeduct_${i}`).checked,
-        note: document.getElementById(`presetNote_${i}`).value.trim()
-      }));
+      const updated = collectDraftPresetsFromDom();
       settingsCol.doc("global_config").set({ shiftPresets: updated }, { merge: true }).then(() => {
         presetModal.classList.add('hidden');
         showToast('常用班別快捷鍵已更新！');
@@ -943,9 +1093,10 @@
       showToast('已更新當月八曜勞健保金額！');
     });
 
-    // --- 起訖時間自動換算工時 ---
+    // --- 起訖時間自動換算工時 (分鐘限定 00 / 30) ---
     function calculateHoursByTime() {
-      const start = startTimeInput.value, end = endTimeInput.value;
+      const start = combineTimeFromSelectors(startHour, startMin);
+      const end = combineTimeFromSelectors(endHour, endMin);
       if (!start || !end) return;
       const [sH, sM] = start.split(':').map(Number);
       const [eH, eM] = end.split(':').map(Number);
@@ -955,12 +1106,11 @@
       shiftHoursInput.value = Math.round((diffMinutes / 60) * 100) / 100;
       autoCalcTip.classList.remove('hidden');
     }
-    startTimeInput.addEventListener('change', calculateHoursByTime);
-    endTimeInput.addEventListener('change', calculateHoursByTime);
-    manualDeductRest.addEventListener('change', calculateHoursByTime);
+    [startHour, startMin, endHour, endMin, manualDeductRest].forEach(el => el.addEventListener('change', calculateHoursByTime));
 
     function calculateBatchHoursByTime() {
-      const start = batchStartTime.value, end = batchEndTime.value;
+      const start = combineTimeFromSelectors(batchStartHour, batchStartMin);
+      const end = combineTimeFromSelectors(batchEndHour, batchEndMin);
       if (!start || !end) return;
       const [sH, sM] = start.split(':').map(Number);
       const [eH, eM] = end.split(':').map(Number);
@@ -969,12 +1119,11 @@
       if (batchDeductRest.checked) diffMinutes = Math.max(0, diffMinutes - 30);
       batchHoursInput.value = Math.round((diffMinutes / 60) * 100) / 100;
     }
-    batchStartTime.addEventListener('change', calculateBatchHoursByTime);
-    batchEndTime.addEventListener('change', calculateBatchHoursByTime);
-    batchDeductRest.addEventListener('change', calculateBatchHoursByTime);
+    [batchStartHour, batchStartMin, batchEndHour, batchEndMin, batchDeductRest].forEach(el => el.addEventListener('change', calculateBatchHoursByTime));
 
     function calculateEditHours() {
-      const start = editStartTime.value, end = editEndTime.value;
+      const start = combineTimeFromSelectors(editStartHour, editStartMin);
+      const end = combineTimeFromSelectors(editEndHour, editEndMin);
       if (!start || !end) return;
       const [sH, sM] = start.split(':').map(Number);
       const [eH, eM] = end.split(':').map(Number);
@@ -983,9 +1132,7 @@
       if (editShiftDeductRest.checked) diff = Math.max(0, diff - 30);
       editShiftHours.value = Math.round((diff / 60) * 100) / 100;
     }
-    editStartTime.addEventListener('change', calculateEditHours);
-    editEndTime.addEventListener('change', calculateEditHours);
-    editShiftDeductRest.addEventListener('change', calculateEditHours);
+    [editStartHour, editStartMin, editEndHour, editEndMin, editShiftDeductRest].forEach(el => el.addEventListener('change', calculateEditHours));
 
     // --- 單日手動排班儲存 (含日期防呆) ---
     document.getElementById('singleShiftForm').addEventListener('submit', (e) => {
@@ -1001,7 +1148,9 @@
       const hours = parseFloat(shiftHoursInput.value);
       const note = document.getElementById('shiftNote').value.trim();
       const isHolidayDouble = shiftHolidayDouble.checked;
-      const timeSlot = (startTimeInput.value && endTimeInput.value) ? `${startTimeInput.value}-${endTimeInput.value}` : '';
+      const sStr = combineTimeFromSelectors(startHour, startMin);
+      const eStr = combineTimeFromSelectors(endHour, endMin);
+      const timeSlot = (sStr && eStr) ? `${sStr}-${eStr}` : '';
 
       const duplicate = shifts.find(s => s.date === date && s.job === job);
       if (duplicate && !confirm(`⚠️ 提醒：${date} 已有相同單位的排班紀錄，確定要重複新增嗎？`)) return;
@@ -1017,7 +1166,8 @@
           monthPicker.value = currentMonth;
           listenSettings();
         }
-        startTimeInput.value = ''; endTimeInput.value = '';
+        startHour.value = ''; startMin.value = '';
+        endHour.value = ''; endMin.value = '';
         document.getElementById('shiftNote').value = '';
         shiftHolidayDouble.checked = false;
         autoCalcTip.classList.add('hidden');
@@ -1299,11 +1449,11 @@
 
       if (s.timeSlot && s.timeSlot.includes('-')) {
         const parts = s.timeSlot.split('-');
-        editStartTime.value = parts[0];
-        editEndTime.value = parts[1];
+        setTimeSelectors(editStartHour, editStartMin, parts[0]);
+        setTimeSelectors(editEndHour, editEndMin, parts[1]);
       } else {
-        editStartTime.value = '';
-        editEndTime.value = '';
+        setTimeSelectors(editStartHour, editStartMin, '');
+        setTimeSelectors(editEndHour, editEndMin, '');
       }
       editShiftModal.classList.remove('hidden');
     };
@@ -1319,7 +1469,9 @@
       const restDeducted = editShiftDeductRest.checked;
       const isHolidayDouble = editShiftHolidayDouble.checked;
       const note = editShiftNote.value.trim();
-      const timeSlot = (editStartTime.value && editEndTime.value) ? `${editStartTime.value}-${editEndTime.value}` : '';
+      const sStr = combineTimeFromSelectors(editStartHour, editStartMin);
+      const eStr = combineTimeFromSelectors(editEndHour, editEndMin);
+      const timeSlot = (sStr && eStr) ? `${sStr}-${eStr}` : '';
 
       shiftsCol.doc(id).update({
         date, job, hours, timeSlot, restDeducted, isHolidayDouble, note
@@ -1455,7 +1607,9 @@
       const hours = parseFloat(batchHoursInput.value);
       const isHolidayDouble = batchHolidayDouble.checked;
       const note = document.getElementById('batchNote').value.trim();
-      const timeSlot = (batchStartTime.value && batchEndTime.value) ? `${batchStartTime.value}-${batchEndTime.value}` : '';
+      const sStr = combineTimeFromSelectors(batchStartHour, batchStartMin);
+      const eStr = combineTimeFromSelectors(batchEndHour, batchEndMin);
+      const timeSlot = (sStr && eStr) ? `${sStr}-${eStr}` : '';
 
       const datesArr = Array.from(selectedDates);
       const existing = shifts.filter(s => datesArr.includes(s.date) && s.job === job);
@@ -1480,7 +1634,8 @@
       batch.commit().then(() => {
         document.getElementById('batchModal').classList.add('hidden');
         document.getElementById('batchNote').value = '';
-        batchStartTime.value = ''; batchEndTime.value = '';
+        batchStartHour.value = ''; batchStartMin.value = '';
+        batchEndHour.value = ''; batchEndMin.value = '';
         batchHolidayDouble.checked = false;
         showToast(`已成功套用 ${datesArr.length} 天的排班！`);
       }).catch(checkFirebaseError);
@@ -1509,7 +1664,6 @@
       const healthBracketA = payA > 0 ? getHealthBracket(payA) : 0;
       const healthA = payA > 0 ? Math.round(healthBracketA * 0.0517 * 0.30) : 0;
 
-      // 若有手動輸入當月勞健保金額，直接採用手動金額；否則採級距試算
       const finalDeductA = customDeductA !== null ? customDeductA : (laborA + healthA);
 
       return {
@@ -1546,7 +1700,6 @@
       let payA = 0;
       shiftsA.forEach(s => { payA += calcSingleShiftPay(s, rateA); });
 
-      // 松江單量統計：當月單 ✕ $500；快樂單不算在當月薪水；勞健保掛八曜故松江免扣
       const paySongjiang = currentMonthOrders * ORDER_UNIT_PRICE;
       const daysSongjiangCount = songjiangDates.size;
 
@@ -1563,7 +1716,6 @@
       document.getElementById('headerCurrentOrders').textContent = `當月 ${currentMonthOrders} 單`;
       document.getElementById('totalDeduction').textContent = `-$${insResult.totalDeductA.toLocaleString()}`;
 
-      // 八曜統計更新
       document.getElementById('payA').textContent = `$${Math.round(payA).toLocaleString()}`;
       document.getElementById('netPayA').textContent = `$${netPayA.toLocaleString()}`;
       document.getElementById('hoursA').textContent = hoursA.toFixed(1);
@@ -1589,7 +1741,6 @@
         document.getElementById('bonusTipA').className = 'text-xs text-slate-400 mt-1.5';
       }
 
-      // 松江統計更新
       document.getElementById('paySongjiang').textContent = `$${Math.round(paySongjiang).toLocaleString()}`;
       document.getElementById('netPaySongjiang').textContent = `$${netPaySongjiang.toLocaleString()}`;
       document.getElementById('daysSongjiang').textContent = daysSongjiangCount;
@@ -1598,7 +1749,6 @@
       document.getElementById('summaryCurrentOrdersText').textContent = `${currentMonthOrders} 單`;
       document.getElementById('summaryHappyOrdersText').textContent = `${happyOrders} 單`;
 
-      // 實際入帳差額比對
       const diffTipA = document.getElementById('diffTipA');
       if (actualPayA !== null) {
         const diffA = actualPayA - netPayA;
